@@ -1,33 +1,37 @@
-name: "action-coolify"
-description: "Trigger Coolify Deployments (and wait for them to finish)"
+name: "Coolify v4 Deploy"
+description: "Trigger Coolify v4 deployments and wait for completion."
+branding:
+  icon: "upload-cloud"
+  color: "blue"
+
 inputs:
-  coolify-url:
-    description: "Coolify base URL or API URL. Inferred from webhook when provided."
-    required: false
-  api-key:
-    description: "Coolify API key. Can also be provided as coolify-token or COOLIFY_TOKEN."
-    required: false
-  coolify-token:
-    description: "Coolify API key alias."
-    required: false
   webhook:
-    description: "Full Coolify deploy URL, for example https://coolify.example.com/api/v1/deploy?uuid=app_uuid&force=false. uuid, tag, and force are inferred from the query string."
+    description: "Full Coolify deploy URL. Example: https://coolify.example.com/api/v1/deploy?uuid=app_uuid&force=false. The action infers coolify-url, uuid, tag, and force from this URL."
     required: false
   coolify-webhook:
-    description: "Coolify deploy URL alias. Can also be provided as COOLIFY_WEBHOOK_STAGING or COOLIFY_WEBHOOK."
+    description: "Alias for webhook. You can also provide COOLIFY_WEBHOOK_STAGING or COOLIFY_WEBHOOK as environment variables."
+    required: false
+  coolify-token:
+    description: "Coolify API token. You can also provide COOLIFY_TOKEN as an environment variable."
+    required: false
+  api-key:
+    description: "Alias for coolify-token."
+    required: false
+  coolify-url:
+    description: "Coolify base URL or API URL. Inferred from webhook when webhook is provided."
     required: false
   wait:
-    description: "Seconds to wait for the deployment to finish"
+    description: "Seconds to wait for all triggered deployments to finish."
     required: false
     default: "600"
   tag:
-    description: "Tag name(s). Comma separated list is also accepted."
+    description: "Coolify tag name or comma-separated tag names to deploy."
     required: false
   uuid:
-    description: "Resource UUID(s). Comma separated list is also accepted."
+    description: "Coolify resource UUID or comma-separated UUIDs to deploy."
     required: false
   force:
-    description: "Force rebuild (without cache)"
+    description: "Force rebuild without cache."
     required: false
 
 runs:
