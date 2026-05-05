@@ -12367,12 +12367,12 @@ var require_request2 = __commonJS({
         };
         let request = null;
         let fallbackMode = null;
-        const baseUrl2 = this[kRealm].settingsObject.baseUrl;
+        const baseUrl = this[kRealm].settingsObject.baseUrl;
         let signal = null;
         if (typeof input === "string") {
           let parsedURL;
           try {
-            parsedURL = new URL(input, baseUrl2);
+            parsedURL = new URL(input, baseUrl);
           } catch (err) {
             throw new TypeError("Failed to parse URL from " + input, { cause: err });
           }
@@ -12462,7 +12462,7 @@ var require_request2 = __commonJS({
           } else {
             let parsedReferrer;
             try {
-              parsedReferrer = new URL(referrer, baseUrl2);
+              parsedReferrer = new URL(referrer, baseUrl);
             } catch (err) {
               throw new TypeError(`Referrer "${referrer}" is not a valid URL.`, { cause: err });
             }
@@ -18226,12 +18226,12 @@ var require_summary = __commonJS({
        *
        * @returns {string} content wrapped in HTML element
        */
-      wrap(tag2, content, attrs = {}) {
+      wrap(tag, content, attrs = {}) {
         const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
         if (!content) {
-          return `<${tag2}${htmlAttrs}>`;
+          return `<${tag}${htmlAttrs}>`;
         }
-        return `<${tag2}${htmlAttrs}>${content}</${tag2}>`;
+        return `<${tag}${htmlAttrs}>${content}</${tag}>`;
       }
       /**
        * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
@@ -18326,9 +18326,9 @@ var require_summary = __commonJS({
        * @returns {Summary} summary instance
        */
       addList(items, ordered = false) {
-        const tag2 = ordered ? "ol" : "ul";
+        const tag = ordered ? "ol" : "ul";
         const listItems = items.map((item) => this.wrap("li", item)).join("");
-        const element = this.wrap(tag2, listItems);
+        const element = this.wrap(tag, listItems);
         return this.addRaw(element).addEOL();
       }
       /**
@@ -18345,9 +18345,9 @@ var require_summary = __commonJS({
               return this.wrap("td", cell);
             }
             const { header, data, colspan, rowspan } = cell;
-            const tag2 = header ? "th" : "td";
+            const tag = header ? "th" : "td";
             const attrs = Object.assign(Object.assign({}, colspan && { colspan }), rowspan && { rowspan });
-            return this.wrap(tag2, data, attrs);
+            return this.wrap(tag, data, attrs);
           }).join("");
           return this.wrap("tr", cells);
         }).join("");
@@ -18390,8 +18390,8 @@ var require_summary = __commonJS({
        * @returns {Summary} summary instance
        */
       addHeading(text, level) {
-        const tag2 = `h${level}`;
-        const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag2) ? tag2 : "h1";
+        const tag = `h${level}`;
+        const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
         const element = this.wrap(allowedTag, text);
         return this.addRaw(element).addEOL();
       }
@@ -18728,9 +18728,9 @@ var require_io = __commonJS({
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
-        const { force: force2, recursive, copySourceDirectory } = readCopyOptions(options);
+        const { force, recursive, copySourceDirectory } = readCopyOptions(options);
         const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
-        if (destStat && destStat.isFile() && !force2) {
+        if (destStat && destStat.isFile() && !force) {
           return;
         }
         const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path.join(dest, path.basename(source)) : dest;
@@ -18742,13 +18742,13 @@ var require_io = __commonJS({
           if (!recursive) {
             throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
           } else {
-            yield cpDirRecursive(source, newDest, 0, force2);
+            yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
           if (path.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
-          yield copyFile(source, newDest, force2);
+          yield copyFile(source, newDest, force);
         }
       });
     }
@@ -18868,12 +18868,12 @@ var require_io = __commonJS({
     }
     exports2.findInPath = findInPath;
     function readCopyOptions(options) {
-      const force2 = options.force == null ? true : options.force;
+      const force = options.force == null ? true : options.force;
       const recursive = Boolean(options.recursive);
       const copySourceDirectory = options.copySourceDirectory == null ? true : Boolean(options.copySourceDirectory);
-      return { force: force2, recursive, copySourceDirectory };
+      return { force, recursive, copySourceDirectory };
     }
-    function cpDirRecursive(sourceDir, destDir, currentDepth, force2) {
+    function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
       return __awaiter(this, void 0, void 0, function* () {
         if (currentDepth >= 255)
           return;
@@ -18885,15 +18885,15 @@ var require_io = __commonJS({
           const destFile = `${destDir}/${fileName}`;
           const srcFileStat = yield ioUtil.lstat(srcFile);
           if (srcFileStat.isDirectory()) {
-            yield cpDirRecursive(srcFile, destFile, currentDepth, force2);
+            yield cpDirRecursive(srcFile, destFile, currentDepth, force);
           } else {
-            yield copyFile(srcFile, destFile, force2);
+            yield copyFile(srcFile, destFile, force);
           }
         }
         yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
       });
     }
-    function copyFile(srcFile, destFile, force2) {
+    function copyFile(srcFile, destFile, force) {
       return __awaiter(this, void 0, void 0, function* () {
         if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
           try {
@@ -18907,7 +18907,7 @@ var require_io = __commonJS({
           }
           const symlinkFull = yield ioUtil.readlink(srcFile);
           yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? "junction" : null);
-        } else if (!(yield ioUtil.exists(destFile)) || force2) {
+        } else if (!(yield ioUtil.exists(destFile)) || force) {
           yield ioUtil.copyFile(srcFile, destFile);
         }
       });
@@ -19855,7 +19855,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 });
 
 // src/action.ts
-var import_core = __toESM(require_core());
+var import_core2 = __toESM(require_core());
 
 // node_modules/openapi-fetch/dist/index.js
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
@@ -19867,7 +19867,7 @@ function randomID() {
 }
 function createClient(clientOptions) {
   let {
-    baseUrl: baseUrl2 = "",
+    baseUrl = "",
     Request: CustomRequest = globalThis.Request,
     fetch: baseFetch = globalThis.fetch,
     querySerializer: globalQuerySerializer,
@@ -19877,7 +19877,7 @@ function createClient(clientOptions) {
     ...baseOptions
   } = { ...clientOptions };
   requestInitExt = supportsRequestInitExt() ? requestInitExt : void 0;
-  baseUrl2 = removeTrailingSlash(baseUrl2);
+  baseUrl = removeTrailingSlash(baseUrl);
   const middlewares = [];
   async function coreFetch(schemaPath, fetchOptions) {
     const {
@@ -19893,7 +19893,7 @@ function createClient(clientOptions) {
       ...init
     } = fetchOptions || {};
     if (localBaseUrl) {
-      baseUrl2 = removeTrailingSlash(localBaseUrl);
+      baseUrl = removeTrailingSlash(localBaseUrl);
     }
     let querySerializer = typeof globalQuerySerializer === "function" ? globalQuerySerializer : createQuerySerializer(globalQuerySerializer);
     if (requestQuerySerializer) {
@@ -19919,7 +19919,7 @@ function createClient(clientOptions) {
     };
     let id;
     let options;
-    let request = new CustomRequest(createFinalURL(schemaPath, { baseUrl: baseUrl2, params, querySerializer }), requestInit);
+    let request = new CustomRequest(createFinalURL(schemaPath, { baseUrl, params, querySerializer }), requestInit);
     for (const key in init) {
       if (!(key in request)) {
         request[key] = init[key];
@@ -19928,7 +19928,7 @@ function createClient(clientOptions) {
     if (middlewares.length) {
       id = randomID();
       options = Object.freeze({
-        baseUrl: baseUrl2,
+        baseUrl,
         fetch,
         parseAs,
         querySerializer,
@@ -20292,86 +20292,225 @@ function removeTrailingSlash(url) {
   return url;
 }
 
+// src/config.ts
+var import_core = __toESM(require_core());
+var API_BASE_PATH = "/api/v1";
+var DEFAULT_COOLIFY_URL = "https://app.coolify.io";
+var toOptionalString = (value) => {
+  const trimmed = value?.trim();
+  return trimmed === "" ? void 0 : trimmed;
+};
+var normalizeApiBaseUrl = (coolifyUrl) => {
+  const url = new URL(coolifyUrl);
+  const apiBasePathIndex = url.pathname.indexOf(API_BASE_PATH);
+  if (apiBasePathIndex >= 0) {
+    url.pathname = url.pathname.slice(
+      0,
+      apiBasePathIndex + API_BASE_PATH.length
+    );
+  } else {
+    url.pathname = API_BASE_PATH;
+  }
+  url.search = "";
+  url.hash = "";
+  return url.toString().replace(/\/$/, "");
+};
+var parseBooleanInput = (value, name) => {
+  switch (value.trim().toLowerCase()) {
+    case "true":
+    case "1":
+    case "yes":
+    case "y":
+      return true;
+    case "false":
+    case "0":
+    case "no":
+    case "n":
+      return false;
+    default:
+      throw new Error(`${name} must be a boolean value.`);
+  }
+};
+var parseCoolifyWebhookUrl = (webhookUrl) => {
+  let url;
+  try {
+    url = new URL(webhookUrl);
+  } catch (error) {
+    throw new Error(
+      `Invalid Coolify webhook URL: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+  if (!url.pathname.replace(/\/+$/, "").endsWith(`${API_BASE_PATH}/deploy`)) {
+    throw new Error("Coolify webhook URL must point to /api/v1/deploy.");
+  }
+  const config = {
+    baseUrl: normalizeApiBaseUrl(url.toString())
+  };
+  const tag = toOptionalString(url.searchParams.get("tag"));
+  if (tag) {
+    config.tag = tag;
+  }
+  const uuid = toOptionalString(url.searchParams.get("uuid"));
+  if (uuid) {
+    config.uuid = uuid;
+  }
+  const force = toOptionalString(url.searchParams.get("force"));
+  if (force !== void 0) {
+    config.force = parseBooleanInput(force, "force");
+  }
+  return config;
+};
+var optionalInput = (name) => toOptionalString((0, import_core.getInput)(name, { required: false }));
+var optionalEnv = (name) => toOptionalString(process.env[name]);
+var parseWaitTimeSeconds = (value) => {
+  const waitTimeSeconds = Number.parseInt(value ?? "600", 10);
+  if (!Number.isFinite(waitTimeSeconds) || waitTimeSeconds <= 0) {
+    throw new Error("wait must be a positive number of seconds.");
+  }
+  return waitTimeSeconds;
+};
+var readConfig = () => {
+  const webhookUrl = optionalInput("webhook") ?? optionalInput("coolify-webhook") ?? optionalEnv("COOLIFY_WEBHOOK_STAGING") ?? optionalEnv("COOLIFY_WEBHOOK");
+  const webhookConfig = webhookUrl ? parseCoolifyWebhookUrl(webhookUrl) : void 0;
+  const apiKey = optionalInput("api-key") ?? optionalInput("coolify-token") ?? optionalEnv("COOLIFY_TOKEN");
+  if (!apiKey) {
+    throw new Error(
+      "Coolify token must be provided through api-key, coolify-token, or COOLIFY_TOKEN."
+    );
+  }
+  const baseUrl = normalizeApiBaseUrl(
+    optionalInput("coolify-url") ?? webhookConfig?.baseUrl ?? DEFAULT_COOLIFY_URL
+  );
+  const tag = optionalInput("tag") ?? webhookConfig?.tag;
+  const uuid = optionalInput("uuid") ?? webhookConfig?.uuid;
+  const forceInput = optionalInput("force");
+  const force = forceInput !== void 0 ? parseBooleanInput(forceInput, "force") : webhookConfig?.force ?? false;
+  if (!tag && !uuid) {
+    throw new Error(
+      "Either tag or uuid must be provided as an input or in the Coolify webhook URL."
+    );
+  }
+  return {
+    apiKey,
+    baseUrl,
+    waitTimeSeconds: parseWaitTimeSeconds(optionalInput("wait")),
+    tag,
+    uuid,
+    force
+  };
+};
+
 // src/action.ts
-var waitTimeSeconds = Number.parseInt((0, import_core.getInput)("wait", { required: false }));
-var apiKey = (0, import_core.getInput)("api-key", { required: true });
-var coolifyUrl = (0, import_core.getInput)("coolify-url", { required: false });
-var baseUrl = new URL("/api/v1", coolifyUrl).toString();
-var coolifyClient = createClient({
-  baseUrl,
+var terminalSuccessStatuses = /* @__PURE__ */ new Set(["finished"]);
+var terminalFailureStatuses = /* @__PURE__ */ new Set([
+  "failed",
+  "cancelled",
+  "cancelled-by-user",
+  "cancelled-by-system"
+]);
+var fail = (message) => {
+  (0, import_core2.setFailed)(message);
+  process.exit(1);
+};
+var getErrorMessage = (error) => {
+  if (typeof error === "object" && error !== null && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return JSON.stringify(error);
+};
+var createCoolifyClient = (config) => createClient({
+  baseUrl: config.baseUrl,
   headers: {
-    Authorization: `Bearer ${apiKey}`,
+    Authorization: `Bearer ${config.apiKey}`,
     "Content-Type": "application/json"
   }
 });
-var tag = (0, import_core.getInput)("tag", { required: false });
-if (tag === "") {
-  tag = void 0;
-}
-var uuid = (0, import_core.getInput)("uuid", { required: false });
-if (uuid === "") {
-  uuid = void 0;
-}
-var force = (0, import_core.getInput)("force", { required: false }) === "true";
-if (!tag && !uuid) {
-  (0, import_core.setFailed)("Either tag or uuid must be provided");
-  process.exit(1);
-}
-var deploy = async () => {
-  if (tag) (0, import_core.debug)(`Deploying tag: ${tag}`);
-  if (uuid) (0, import_core.debug)(`Deploying uuid: ${uuid}`);
+var deploy = async (coolifyClient, config) => {
+  if (config.tag) (0, import_core2.debug)(`Deploying tag: ${config.tag}`);
+  if (config.uuid) (0, import_core2.debug)(`Deploying uuid: ${config.uuid}`);
   const result = await coolifyClient.GET("/deploy", {
-    params: { query: { tag, uuid, force } }
+    params: {
+      query: {
+        tag: config.tag,
+        uuid: config.uuid,
+        force: config.force
+      }
+    }
   });
-  if (!result.data) {
-    (0, import_core.setFailed)(`Failed to deploy: ${result.error.message}`);
-    process.exit(1);
+  const data = result.data;
+  if (!data) {
+    return fail(`Failed to deploy: ${getErrorMessage(result.error)}`);
   }
-  (0, import_core.debug)(JSON.stringify(result.data));
-  return result.data.deployments ?? [];
+  (0, import_core2.debug)(JSON.stringify(data));
+  const deployments = data.deployments;
+  if (!Array.isArray(deployments)) {
+    return fail("Coolify deploy response did not include deployments[].");
+  }
+  return deployments;
 };
-var getDeploymentStatus = async (uuid2) => {
+var getDeploymentStatus = async (coolifyClient, uuid) => {
   const result = await coolifyClient.GET("/deployments/{uuid}", {
-    params: { path: { uuid: uuid2 } }
+    params: { path: { uuid } }
   });
-  if (!result.data) {
-    (0, import_core.setFailed)(
-      `Failed to get deployment status for deployment '${uuid2}': ${result.error.message}`
+  const data = result.data;
+  if (!data) {
+    return fail(
+      `Failed to get deployment status for deployment '${uuid}': ${getErrorMessage(result.error)}`
     );
-    process.exit(1);
   }
-  return result.data;
+  return data;
+};
+var collectDeploymentUUIDs = (deployments) => {
+  const deploymentUUIDs = deployments.map(
+    (deployment) => toOptionalString(deployment.deployment_uuid)
+  );
+  if (deploymentUUIDs.length === 0) {
+    fail("Coolify deploy response did not include any deployments.");
+  }
+  if (deploymentUUIDs.some((deploymentUUID) => !deploymentUUID)) {
+    fail(
+      "Coolify deploy response included a deployment without deployment_uuid."
+    );
+  }
+  return deploymentUUIDs;
 };
 void (async () => {
-  const deployments = await deploy();
-  const deploymentUUIDs = deployments.map(
-    (deployment) => deployment.deployment_uuid
-  );
-  const status = Object.fromEntries(
-    deploymentUUIDs.map((uuid2) => [uuid2, "queued"])
-  );
-  const endTime = Date.now() + waitTimeSeconds * 1e3;
-  const pause = 5e3;
-  while (Object.values(status).some((s) => s !== "finished")) {
-    if (Date.now() > endTime) {
-      (0, import_core.setFailed)("Timeout reached");
-      process.exit(1);
-    }
-    for (const uuid2 of Object.keys(status).filter(
-      (uuid3) => status[uuid3] !== "finished" && status[uuid3] !== "failed"
+  try {
+    const config = readConfig();
+    const coolifyClient = createCoolifyClient(config);
+    const deployments = await deploy(coolifyClient, config);
+    const deploymentUUIDs = collectDeploymentUUIDs(deployments);
+    (0, import_core2.info)(`Triggered ${deploymentUUIDs.length} Coolify deployment(s).`);
+    const status = Object.fromEntries(
+      deploymentUUIDs.map((uuid) => [uuid, "queued"])
+    );
+    const endTime = Date.now() + config.waitTimeSeconds * 1e3;
+    const pause = 5e3;
+    while (Object.values(status).some(
+      (currentStatus) => !terminalSuccessStatuses.has(currentStatus)
     )) {
-      const nextStatus = await getDeploymentStatus(uuid2);
-      if (nextStatus.status !== status[uuid2]) {
-        (0, import_core.info)(
-          `Deployment ${nextStatus.application_name} (${uuid2}) status: ${nextStatus.status}`
-        );
-        status[uuid2] = nextStatus.status ?? "queued";
+      if (Date.now() > endTime) {
+        fail("Timeout reached");
       }
-      if (status[uuid2] === "failed") {
-        (0, import_core.setFailed)(`Deployment ${uuid2} failed`);
+      for (const uuid of Object.keys(status).filter(
+        (uuid2) => !terminalSuccessStatuses.has(status[uuid2])
+      )) {
+        const nextStatus = await getDeploymentStatus(coolifyClient, uuid);
+        const nextStatusValue = nextStatus.status ?? "queued";
+        if (nextStatusValue !== status[uuid]) {
+          (0, import_core2.info)(
+            `Deployment ${nextStatus.application_name ?? "unknown"} (${uuid}) status: ${nextStatusValue}`
+          );
+          status[uuid] = nextStatusValue;
+        }
+        if (terminalFailureStatuses.has(status[uuid])) {
+          fail(`Deployment ${uuid} failed with status: ${status[uuid]}`);
+        }
       }
+      await new Promise((resolve) => setTimeout(resolve, pause));
     }
-    await new Promise((resolve) => setTimeout(resolve, pause));
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
   }
 })();
 /*! Bundled license information:

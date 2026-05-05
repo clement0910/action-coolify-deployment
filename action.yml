@@ -1,13 +1,21 @@
 name: "action-coolify"
 description: "Trigger Coolify Deployments (and wait for them to finish)"
 inputs:
-  coolify-url: 
-    description: "Coolify API URL"
+  coolify-url:
+    description: "Coolify base URL or API URL. Inferred from webhook when provided."
     required: false
-    default: "https://app.coolify.io"
   api-key:
-    description: "Coolify API key"
-    required: true
+    description: "Coolify API key. Can also be provided as coolify-token or COOLIFY_TOKEN."
+    required: false
+  coolify-token:
+    description: "Coolify API key alias."
+    required: false
+  webhook:
+    description: "Full Coolify deploy URL, for example https://coolify.example.com/api/v1/deploy?uuid=app_uuid&force=false. uuid, tag, and force are inferred from the query string."
+    required: false
+  coolify-webhook:
+    description: "Coolify deploy URL alias. Can also be provided as COOLIFY_WEBHOOK_STAGING or COOLIFY_WEBHOOK."
+    required: false
   wait:
     description: "Seconds to wait for the deployment to finish"
     required: false
@@ -21,7 +29,6 @@ inputs:
   force:
     description: "Force rebuild (without cache)"
     required: false
-    default: "false"
 
 runs:
   using: "node20"

@@ -1,105 +1,169 @@
-import { debug, getInput, info, setFailed } from "@actions/core";
+import { debug, info, setFailed } from "@actions/core";
 import createClient from "openapi-fetch";
+import { type DeployConfig, readConfig, toOptionalString } from "./config";
 import type { paths } from "./schema";
 
-const waitTimeSeconds = Number.parseInt(getInput("wait", { required: false }));
-const apiKey = getInput("api-key", { required: true });
-const coolifyUrl = getInput("coolify-url", { required: false });
-const baseUrl = new URL("/api/v1", coolifyUrl).toString();
-const coolifyClient = createClient<paths>({
-  baseUrl,
-  headers: {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  },
-});
+type CoolifyClient = ReturnType<typeof createClient<paths>>;
+type DeployResponse = NonNullable<
+  paths["/deploy"]["get"]["responses"]["200"]["content"]["application/json"]
+>;
+type Deployment = NonNullable<DeployResponse["deployments"]>[number];
+type DeploymentStatus = NonNullable<
+  paths["/deployments/{uuid}"]["get"]["responses"]["200"]["content"]["application/json"]
+>;
 
-let tag: string | undefined = getInput("tag", { required: false });
-if (tag === "") {
-  tag = undefined;
-}
+const terminalSuccessStatuses = new Set(["finished"]);
+const terminalFailureStatuses = new Set([
+  "failed",
+  "cancelled",
+  "cancelled-by-user",
+  "cancelled-by-system",
+]);
 
-let uuid: string | undefined = getInput("uuid", { required: false });
-if (uuid === "") {
-  uuid = undefined;
-}
-
-const force: boolean = getInput("force", { required: false }) === "true";
-
-if (!tag && !uuid) {
-  setFailed("Either tag or uuid must be provided");
+const fail = (message: string): never => {
+  setFailed(message);
   process.exit(1);
-}
-
-const deploy = async () => {
-  if (tag) debug(`Deploying tag: ${tag}`);
-  if (uuid) debug(`Deploying uuid: ${uuid}`);
-
-  const result = await coolifyClient.GET("/deploy", {
-    params: { query: { tag, uuid, force } },
-  });
-
-  if (!result.data) {
-    setFailed(`Failed to deploy: ${result.error.message}`);
-    process.exit(1);
-  }
-
-  debug(JSON.stringify(result.data));
-
-  return result.data.deployments ?? [];
 };
 
-const getDeploymentStatus = async (uuid: string) => {
+const getErrorMessage = (error: unknown): string => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+
+  return JSON.stringify(error);
+};
+
+const createCoolifyClient = (config: DeployConfig) =>
+  createClient<paths>({
+    baseUrl: config.baseUrl,
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+const deploy = async (
+  coolifyClient: CoolifyClient,
+  config: DeployConfig,
+): Promise<Deployment[]> => {
+  if (config.tag) debug(`Deploying tag: ${config.tag}`);
+  if (config.uuid) debug(`Deploying uuid: ${config.uuid}`);
+
+  const result = await coolifyClient.GET("/deploy", {
+    params: {
+      query: {
+        tag: config.tag,
+        uuid: config.uuid,
+        force: config.force,
+      },
+    },
+  });
+
+  const data = result.data;
+
+  if (!data) {
+    return fail(`Failed to deploy: ${getErrorMessage(result.error)}`);
+  }
+
+  debug(JSON.stringify(data));
+
+  const deployments = data.deployments;
+
+  if (!Array.isArray(deployments)) {
+    return fail("Coolify deploy response did not include deployments[].");
+  }
+
+  return deployments;
+};
+
+const getDeploymentStatus = async (
+  coolifyClient: CoolifyClient,
+  uuid: string,
+): Promise<DeploymentStatus> => {
   const result = await coolifyClient.GET("/deployments/{uuid}", {
     params: { path: { uuid } },
   });
 
-  if (!result.data) {
-    setFailed(
-      `Failed to get deployment status for deployment '${uuid}': ${result.error.message}`,
+  const data = result.data;
+
+  if (!data) {
+    return fail(
+      `Failed to get deployment status for deployment '${uuid}': ${getErrorMessage(result.error)}`,
     );
-    process.exit(1);
   }
 
-  return result.data;
+  return data;
+};
+
+const collectDeploymentUUIDs = (deployments: Deployment[]): string[] => {
+  const deploymentUUIDs = deployments.map((deployment) =>
+    toOptionalString(deployment.deployment_uuid),
+  );
+
+  if (deploymentUUIDs.length === 0) {
+    fail("Coolify deploy response did not include any deployments.");
+  }
+
+  if (deploymentUUIDs.some((deploymentUUID) => !deploymentUUID)) {
+    fail(
+      "Coolify deploy response included a deployment without deployment_uuid.",
+    );
+  }
+
+  return deploymentUUIDs as string[];
 };
 
 void (async () => {
-  const deployments = await deploy();
+  try {
+    const config = readConfig();
+    const coolifyClient = createCoolifyClient(config);
+    const deployments = await deploy(coolifyClient, config);
+    const deploymentUUIDs = collectDeploymentUUIDs(deployments);
 
-  const deploymentUUIDs = deployments.map(
-    (deployment) => deployment.deployment_uuid,
-  );
+    info(`Triggered ${deploymentUUIDs.length} Coolify deployment(s).`);
 
-  const status = Object.fromEntries(
-    deploymentUUIDs.map((uuid) => [uuid, "queued"]),
-  );
-  const endTime = Date.now() + waitTimeSeconds * 1000;
-  // Pause between updates
-  const pause = 5000;
+    const status: Record<string, string> = Object.fromEntries(
+      deploymentUUIDs.map((uuid) => [uuid, "queued"]),
+    );
+    const endTime = Date.now() + config.waitTimeSeconds * 1000;
+    // Pause between updates
+    const pause = 5000;
 
-  while (Object.values(status).some((s) => s !== "finished")) {
-    if (Date.now() > endTime) {
-      setFailed("Timeout reached");
-      process.exit(1);
-    }
-
-    for (const uuid of Object.keys(status).filter(
-      (uuid) => status[uuid] !== "finished" && status[uuid] !== "failed",
-    )) {
-      const nextStatus = await getDeploymentStatus(uuid);
-      if (nextStatus.status !== status[uuid]) {
-        info(
-          `Deployment ${nextStatus.application_name} (${uuid}) status: ${nextStatus.status}`,
-        );
-        status[uuid] = nextStatus.status ?? "queued";
+    while (
+      Object.values(status).some(
+        (currentStatus) => !terminalSuccessStatuses.has(currentStatus),
+      )
+    ) {
+      if (Date.now() > endTime) {
+        fail("Timeout reached");
       }
 
-      if (status[uuid] === "failed") {
-        setFailed(`Deployment ${uuid} failed`);
-      }
-    }
+      for (const uuid of Object.keys(status).filter(
+        (uuid) => !terminalSuccessStatuses.has(status[uuid]),
+      )) {
+        const nextStatus = await getDeploymentStatus(coolifyClient, uuid);
+        const nextStatusValue = nextStatus.status ?? "queued";
 
-    await new Promise((resolve) => setTimeout(resolve, pause));
+        if (nextStatusValue !== status[uuid]) {
+          info(
+            `Deployment ${nextStatus.application_name ?? "unknown"} (${uuid}) status: ${nextStatusValue}`,
+          );
+          status[uuid] = nextStatusValue;
+        }
+
+        if (terminalFailureStatuses.has(status[uuid])) {
+          fail(`Deployment ${uuid} failed with status: ${status[uuid]}`);
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, pause));
+    }
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
   }
 })();
