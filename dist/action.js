@@ -20400,6 +20400,25 @@ var readConfig = () => {
   };
 };
 
+// src/deployments.ts
+var collectDeploymentUUIDs = (deployments) => {
+  const deploymentUUIDs = [];
+  const deploymentsWithoutUUID = [];
+  for (const deployment of deployments) {
+    const deploymentUUID = toOptionalString(deployment.deployment_uuid);
+    if (deploymentUUID) {
+      deploymentUUIDs.push(deploymentUUID);
+    } else {
+      deploymentsWithoutUUID.push(deployment);
+    }
+  }
+  return {
+    deploymentUUIDs,
+    deploymentsWithoutUUID
+  };
+};
+var formatCoolifyResponse = (response) => JSON.stringify(response, null, 2);
+
 // src/action.ts
 var terminalSuccessStatuses = /* @__PURE__ */ new Set(["finished"]);
 var terminalFailureStatuses = /* @__PURE__ */ new Set([
@@ -20428,7 +20447,7 @@ var createCoolifyClient = (config) => createClient({
 var deploy = async (coolifyClient, config) => {
   if (config.tag) (0, import_core2.debug)(`Deploying tag: ${config.tag}`);
   if (config.uuid) (0, import_core2.debug)(`Deploying uuid: ${config.uuid}`);
-  const result = await coolifyClient.GET("/deploy", {
+  const result = await coolifyClient.POST("/deploy", {
     params: {
       query: {
         tag: config.tag,
@@ -20444,7 +20463,10 @@ var deploy = async (coolifyClient, config) => {
   (0, import_core2.debug)(JSON.stringify(data));
   const deployments = data.deployments;
   if (!Array.isArray(deployments)) {
-    return fail("Coolify deploy response did not include deployments[].");
+    return fail(
+      `Coolify deploy response did not include deployments[]. Response:
+${formatCoolifyResponse(data)}`
+    );
   }
   return deployments;
 };
@@ -20460,26 +20482,24 @@ var getDeploymentStatus = async (coolifyClient, uuid) => {
   }
   return data;
 };
-var collectDeploymentUUIDs = (deployments) => {
-  const deploymentUUIDs = deployments.map(
-    (deployment) => toOptionalString(deployment.deployment_uuid)
-  );
-  if (deploymentUUIDs.length === 0) {
-    fail("Coolify deploy response did not include any deployments.");
-  }
-  if (deploymentUUIDs.some((deploymentUUID) => !deploymentUUID)) {
-    fail(
-      "Coolify deploy response included a deployment without deployment_uuid."
-    );
-  }
-  return deploymentUUIDs;
-};
 void (async () => {
   try {
     const config = readConfig();
     const coolifyClient = createCoolifyClient(config);
     const deployments = await deploy(coolifyClient, config);
-    const deploymentUUIDs = collectDeploymentUUIDs(deployments);
+    const { deploymentUUIDs, deploymentsWithoutUUID } = collectDeploymentUUIDs(deployments);
+    if (deployments.length === 0) {
+      fail(
+        `Coolify deploy response did not include any deployments. Response:
+${formatCoolifyResponse({ deployments })}`
+      );
+    }
+    if (deploymentsWithoutUUID.length > 0) {
+      fail(
+        `Coolify deploy response included deployment(s) without deployment_uuid. Response:
+${formatCoolifyResponse({ deployments })}`
+      );
+    }
     (0, import_core2.info)(`Triggered ${deploymentUUIDs.length} Coolify deployment(s).`);
     const status = Object.fromEntries(
       deploymentUUIDs.map((uuid) => [uuid, "queued"])

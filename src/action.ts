@@ -1,11 +1,12 @@
 import { debug, info, setFailed } from "@actions/core";
 import createClient from "openapi-fetch";
-import { type DeployConfig, readConfig, toOptionalString } from "./config";
+import { type DeployConfig, readConfig } from "./config";
+import { collectDeploymentUUIDs, formatCoolifyResponse } from "./deployments";
 import type { paths } from "./schema";
 
 type CoolifyClient = ReturnType<typeof createClient<paths>>;
 type DeployResponse = NonNullable<
-  paths["/deploy"]["get"]["responses"]["200"]["content"]["application/json"]
+  paths["/deploy"]["post"]["responses"]["200"]["content"]["application/json"]
 >;
 type Deployment = NonNullable<DeployResponse["deployments"]>[number];
 type DeploymentStatus = NonNullable<
@@ -54,7 +55,7 @@ const deploy = async (
   if (config.tag) debug(`Deploying tag: ${config.tag}`);
   if (config.uuid) debug(`Deploying uuid: ${config.uuid}`);
 
-  const result = await coolifyClient.GET("/deploy", {
+  const result = await coolifyClient.POST("/deploy", {
     params: {
       query: {
         tag: config.tag,
@@ -75,7 +76,9 @@ const deploy = async (
   const deployments = data.deployments;
 
   if (!Array.isArray(deployments)) {
-    return fail("Coolify deploy response did not include deployments[].");
+    return fail(
+      `Coolify deploy response did not include deployments[]. Response:\n${formatCoolifyResponse(data)}`,
+    );
   }
 
   return deployments;
@@ -100,30 +103,25 @@ const getDeploymentStatus = async (
   return data;
 };
 
-const collectDeploymentUUIDs = (deployments: Deployment[]): string[] => {
-  const deploymentUUIDs = deployments.map((deployment) =>
-    toOptionalString(deployment.deployment_uuid),
-  );
-
-  if (deploymentUUIDs.length === 0) {
-    fail("Coolify deploy response did not include any deployments.");
-  }
-
-  if (deploymentUUIDs.some((deploymentUUID) => !deploymentUUID)) {
-    fail(
-      "Coolify deploy response included a deployment without deployment_uuid.",
-    );
-  }
-
-  return deploymentUUIDs as string[];
-};
-
 void (async () => {
   try {
     const config = readConfig();
     const coolifyClient = createCoolifyClient(config);
     const deployments = await deploy(coolifyClient, config);
-    const deploymentUUIDs = collectDeploymentUUIDs(deployments);
+    const { deploymentUUIDs, deploymentsWithoutUUID } =
+      collectDeploymentUUIDs(deployments);
+
+    if (deployments.length === 0) {
+      fail(
+        `Coolify deploy response did not include any deployments. Response:\n${formatCoolifyResponse({ deployments })}`,
+      );
+    }
+
+    if (deploymentsWithoutUUID.length > 0) {
+      fail(
+        `Coolify deploy response included deployment(s) without deployment_uuid. Response:\n${formatCoolifyResponse({ deployments })}`,
+      );
+    }
 
     info(`Triggered ${deploymentUUIDs.length} Coolify deployment(s).`);
 

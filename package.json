@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": false,
   "scripts": {
-    "generate": "openapi-typescript https://raw.githubusercontent.com/coollabsio/documentation-coolify/refs/heads/main/docs/public/openapi.json -o ./src/schema.d.ts",
+    "generate": "openapi-typescript https://raw.githubusercontent.com/coollabsio/coolify/refs/heads/main/openapi.json -o ./src/schema.d.ts",
     "build": "tsup",
     "test": "vitest",
     "format": "biome check --write",

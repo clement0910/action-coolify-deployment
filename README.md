@@ -2,6 +2,8 @@
 
 This GitHub Action triggers one or more deployments to Coolify v4 based on `tag` and `uuid`. It waits until the deployment(s) returned by `deployments[]` reach the `finished` status.
 
+If Coolify accepts the deploy request but does not return `deployment_uuid`, the action fails and prints the Coolify response.
+
 ## Inputs
 
 - `webhook` (optional): Full Coolify deploy URL, for example `https://coolify.example.com/api/v1/deploy?uuid=app_uuid&force=false`. The action infers `coolify-url`, `uuid`, `tag`, and `force` from it.

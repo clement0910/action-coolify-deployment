@@ -94,8 +94,8 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Create (Dockerfile)
-     * @description Create new application based on a simple Dockerfile.
+     * Create (Dockerfile without git)
+     * @description Create new application based on a simple Dockerfile (without git).
      */
     post: operations["create-dockerfile-application"];
     delete?: never;
@@ -114,30 +114,10 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Create (Docker Image)
-     * @description Create new application based on a prebuilt docker image
+     * Create (Docker Image without git)
+     * @description Create new application based on a prebuilt docker image (without git).
      */
     post: operations["create-dockerimage-application"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/applications/dockercompose": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Create (Docker Compose)
-     * @description Create new application based on a docker-compose file.
-     */
-    post: operations["create-dockercompose-application"];
     delete?: never;
     options?: never;
     head?: never;
@@ -170,6 +150,26 @@ export interface paths {
      * @description Update application by UUID.
      */
     patch: operations["update-application-by-uuid"];
+    trace?: never;
+  };
+  "/applications/{uuid}/logs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get application logs.
+     * @description Get application logs by UUID.
+     */
+    get: operations["get-application-logs-by-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/applications/{uuid}/envs": {
@@ -247,13 +247,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Start
-     * @description Start application. `Post` request is also accepted.
+     * @description Start application.
      */
-    get: operations["start-application-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["start-application-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -267,13 +267,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Stop
-     * @description Stop application. `Post` request is also accepted.
+     * @description Stop application.
      */
-    get: operations["stop-application-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["stop-application-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -287,20 +287,20 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Restart
-     * @description Restart application. `Post` request is also accepted.
+     * @description Restart application.
      */
-    get: operations["restart-application-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["restart-application-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/applications/{uuid}/execute": {
+  "/applications/{uuid}/move": {
     parameters: {
       query?: never;
       header?: never;
@@ -310,10 +310,370 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Execute Command
-     * @description Execute a command on the application's current container.
+     * Move
+     * @description Move application to another project/environment. This is a purely organizational change — running containers are not affected. Note: after moving, the application will pick up shared environment variables from the new environment on the next deployment.
      */
-    post: operations["execute-command-application"];
+    post: operations["move-application-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/migrate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Migrate to Server
+     * @description Migrate an application to another destination/server owned by the authenticated team. Stops the application, optionally transfers persistent volume data when both servers are managed by Coolify, and updates database records. Redeploy after migration completes.
+     */
+    post: operations["migrate-application-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/storages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Storages
+     * @description List all persistent storages and file storages by application UUID.
+     */
+    get: operations["list-storages-by-application-uuid"];
+    put?: never;
+    /**
+     * Create Storage
+     * @description Create a persistent storage or file storage for an application.
+     */
+    post: operations["create-storage-by-application-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Storage
+     * @description Update a persistent storage or file storage by application UUID.
+     */
+    patch: operations["update-storage-by-application-uuid"];
+    trace?: never;
+  };
+  "/applications/{uuid}/storages/{storage_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Storage
+     * @description Delete a persistent storage or file storage by application UUID.
+     */
+    delete: operations["delete-storage-by-application-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/previews/{pull_request_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Preview Deployment
+     * @description Delete a preview deployment for a pull request. Cancels active deployments, stops containers, removes volumes/networks, and deletes the preview record.
+     */
+    delete: operations["delete-preview-deployment-by-pull-request-id"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/tags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Tags
+     * @description List tags for an application by UUID.
+     */
+    get: operations["list-tags-by-application-uuid"];
+    put?: never;
+    /**
+     * Create Tag
+     * @description Add tag(s) to an application by UUID.
+     */
+    post: operations["create-tag-by-application-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/tags/{tag_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Tag
+     * @description Remove a tag from an application by UUID.
+     */
+    delete: operations["delete-tag-by-application-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/clone": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Clone
+     * @description Clone an application to a destination owned by the authenticated team.
+     */
+    post: operations["clone-application-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/rollback-images": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Rollback Images
+     * @description List available Docker images for rolling back an application. Returns an empty list when the server is unavailable or remote inspection is not possible.
+     */
+    get: operations["list-application-rollback-images"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/rollback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Rollback
+     * @description Queue a rollback deployment for an application to a previous image commit/tag.
+     */
+    post: operations["rollback-application-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Destinations
+     * @description List primary and additional destinations for a standalone application.
+     */
+    get: operations["list-application-destinations"];
+    put?: never;
+    /**
+     * Add Destination
+     * @description Attach an additional standalone Docker destination to an application.
+     */
+    post: operations["add-application-destination"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/destinations/{destination_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove Destination
+     * @description Detach an additional destination from an application.
+     */
+    delete: operations["remove-application-destination"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cloud-init-scripts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Cloud-init Scripts
+     * @description List all cloud-init scripts for the authenticated team.
+     */
+    get: operations["list-cloud-init-scripts"];
+    put?: never;
+    /**
+     * Create Cloud-init Script
+     * @description Create a new cloud-init script for the authenticated team.
+     */
+    post: operations["create-cloud-init-script"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cloud-init-scripts/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Cloud-init Script
+     * @description Get a cloud-init script by UUID.
+     */
+    get: operations["get-cloud-init-script-by-uuid"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete Cloud-init Script
+     * @description Delete a cloud-init script by UUID.
+     */
+    delete: operations["delete-cloud-init-script-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Cloud-init Script
+     * @description Update a cloud-init script by UUID.
+     */
+    patch: operations["update-cloud-init-script-by-uuid"];
+    trace?: never;
+  };
+  "/cloud-tokens": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Cloud Provider Tokens
+     * @description List all cloud provider tokens for the authenticated team.
+     */
+    get: operations["list-cloud-tokens"];
+    put?: never;
+    /**
+     * Create Cloud Provider Token
+     * @description Create a new cloud provider token. The token will be validated before being stored.
+     */
+    post: operations["create-cloud-token"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cloud-tokens/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Cloud Provider Token
+     * @description Get cloud provider token by UUID.
+     */
+    get: operations["get-cloud-token-by-uuid"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete Cloud Provider Token
+     * @description Delete cloud provider token by UUID. Cannot delete if token is used by any servers.
+     */
+    delete: operations["delete-cloud-token-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Cloud Provider Token
+     * @description Update cloud provider token name.
+     */
+    patch: operations["update-cloud-token-by-uuid"];
+    trace?: never;
+  };
+  "/cloud-tokens/{uuid}/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Validate Cloud Provider Token
+     * @description Validate a cloud provider token against the provider API.
+     */
+    post: operations["validate-cloud-token-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -334,6 +694,30 @@ export interface paths {
     get: operations["list-databases"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/backups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get
+     * @description Get backups details by database UUID.
+     */
+    get: operations["get-database-backups-by-uuid"];
+    put?: never;
+    /**
+     * Create Backup
+     * @description Create a new scheduled backup configuration for a database
+     */
+    post: operations["create-database-backup"];
     delete?: never;
     options?: never;
     head?: never;
@@ -366,6 +750,30 @@ export interface paths {
      * @description Update database by UUID.
      */
     patch: operations["update-database-by-uuid"];
+    trace?: never;
+  };
+  "/databases/{uuid}/backups/{scheduled_backup_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete backup configuration
+     * @description Deletes a backup configuration and all its executions.
+     */
+    delete: operations["delete-backup-configuration-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update
+     * @description Update a specific backup configuration for a given database, identified by its UUID and the backup ID
+     */
+    patch: operations["update-database-backup"];
     trace?: never;
   };
   "/databases/postgresql": {
@@ -528,7 +936,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/databases/{uuid}/start": {
+  "/databases/{uuid}/logs": {
     parameters: {
       query?: never;
       header?: never;
@@ -536,12 +944,112 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Start
-     * @description Start database. `Post` request is also accepted.
+     * Get database logs.
+     * @description Get database logs by UUID.
      */
-    get: operations["start-database-by-uuid"];
+    get: operations["get-database-logs-by-uuid"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/backups/{scheduled_backup_uuid}/executions/{execution_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete backup execution
+     * @description Deletes a specific backup execution.
+     */
+    delete: operations["delete-backup-execution-by-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/backups/{scheduled_backup_uuid}/executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List backup executions
+     * @description Get all executions for a specific backup configuration.
+     */
+    get: operations["list-backup-executions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Move
+     * @description Move database to another project/environment. This is a purely organizational change — running containers are not affected. Note: after moving, the database will pick up shared environment variables from the new environment on the next deployment.
+     */
+    post: operations["move-database-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/migrate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Migrate to Server
+     * @description Migrate a database to another destination/server owned by the authenticated team. Stops the database, optionally transfers persistent volume data when both servers are managed by Coolify, and updates database records. Redeploy after migration completes.
+     */
+    post: operations["migrate-database-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start
+     * @description Start database.
+     */
+    post: operations["start-database-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -555,13 +1063,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Stop
-     * @description Stop database. `Post` request is also accepted.
+     * @description Stop database.
      */
-    get: operations["stop-database-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["stop-database-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -575,13 +1083,193 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Restart
-     * @description Restart database. `Post` request is also accepted.
+     * @description Restart database.
      */
-    get: operations["restart-database-by-uuid"];
+    post: operations["restart-database-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Envs
+     * @description List all envs by database UUID.
+     */
+    get: operations["list-envs-by-database-uuid"];
+    put?: never;
+    /**
+     * Create Env
+     * @description Create env by database UUID.
+     */
+    post: operations["create-env-by-database-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Env
+     * @description Update env by database UUID.
+     */
+    patch: operations["update-env-by-database-uuid"];
+    trace?: never;
+  };
+  "/databases/{uuid}/envs/bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Envs (Bulk)
+     * @description Update multiple envs by database UUID.
+     */
+    patch: operations["update-envs-by-database-uuid"];
+    trace?: never;
+  };
+  "/databases/{uuid}/envs/{env_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Env
+     * @description Delete env by UUID.
+     */
+    delete: operations["delete-env-by-database-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/storages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Storages
+     * @description List all persistent storages and file storages by database UUID.
+     */
+    get: operations["list-storages-by-database-uuid"];
+    put?: never;
+    /**
+     * Create Storage
+     * @description Create a persistent storage or file storage for a database.
+     */
+    post: operations["create-storage-by-database-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Storage
+     * @description Update a persistent storage or file storage by database UUID.
+     */
+    patch: operations["update-storage-by-database-uuid"];
+    trace?: never;
+  };
+  "/databases/{uuid}/storages/{storage_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Storage
+     * @description Delete a persistent storage or file storage by database UUID.
+     */
+    delete: operations["delete-storage-by-database-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/tags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Tags
+     * @description List tags for a database by UUID.
+     */
+    get: operations["list-tags-by-database-uuid"];
+    put?: never;
+    /**
+     * Create Tag
+     * @description Add tag(s) to a database by UUID.
+     */
+    post: operations["create-tag-by-database-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/tags/{tag_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Tag
+     * @description Remove a tag from a database by UUID.
+     */
+    delete: operations["delete-tag-by-database-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/clone": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Clone
+     * @description Clone a database to a destination owned by the authenticated team.
+     */
+    post: operations["clone-database-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -628,6 +1316,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/deployments/{uuid}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel
+     * @description Cancel a deployment by UUID.
+     */
+    post: operations["cancel-deployment-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/deploy": {
     parameters: {
       query?: never;
@@ -635,17 +1343,614 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Deploy
-     * @description Deploy by tag or uuid. `Post` request also accepted.
+     * @description Deploy by tag or UUID using query parameters or a JSON body.
      */
-    get: operations["deploy-by-tag-or-uuid"];
+    post: operations["deploy-by-tag-or-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/deployments/applications/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List application deployments
+     * @description List application deployments by using the app uuid
+     */
+    get: operations["list-deployments-by-app-uuid"];
     put?: never;
     post?: never;
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List destinations
+     * @description List all Docker network destinations for the authenticated team.
+     */
+    get: operations["list-destinations"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{server_uuid}/destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List destinations by server
+     * @description List Docker network destinations attached to a server owned by the authenticated team.
+     */
+    get: operations["list-server-destinations"];
+    put?: never;
+    /**
+     * Create destination
+     * @description Create a Docker network destination on a server owned by the authenticated team.
+     */
+    post: operations["create-server-destination"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/destinations/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get destination
+     * @description Get a Docker network destination by UUID.
+     */
+    get: operations["get-destination-by-uuid"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete destination
+     * @description Delete an unused Docker network destination.
+     */
+    delete: operations["delete-destination-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update destination
+     * @description Update a Docker network destination name. Network cannot be changed via the API.
+     */
+    patch: operations["update-destination-by-uuid"];
+    trace?: never;
+  };
+  "/digitalocean/regions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get DigitalOcean regions */
+    get: operations["get-digitalocean-regions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/digitalocean/sizes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get DigitalOcean sizes */
+    get: operations["get-digitalocean-sizes"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/digitalocean/images": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get DigitalOcean images */
+    get: operations["get-digitalocean-images"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/digitalocean/ssh-keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get DigitalOcean SSH keys */
+    get: operations["get-digitalocean-ssh-keys"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/digitalocean": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a server on DigitalOcean */
+    post: operations["create-digitalocean-server"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/github-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List
+     * @description List all GitHub apps.
+     */
+    get: operations["list-github-apps"];
+    put?: never;
+    /**
+     * Create GitHub App
+     * @description Create a new GitHub app.
+     */
+    post: operations["create-github-app"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/github-apps/{github_app_id}/repositories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Load Repositories for a GitHub App
+     * @description Fetch repositories from GitHub for a given GitHub app.
+     */
+    get: operations["load-repositories"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/github-apps/{github_app_id}/repositories/{owner}/{repo}/branches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Load Branches for a GitHub Repository
+     * @description Fetch branches from GitHub for a given repository.
+     */
+    get: operations["load-branches"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/github-apps/{github_app_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete GitHub App
+     * @description Delete a GitHub app if it's not being used by any applications.
+     */
+    delete: operations["deleteGithubApp"];
+    options?: never;
+    head?: never;
+    /**
+     * Update GitHub App
+     * @description Update an existing GitHub app.
+     */
+    patch: operations["updateGithubApp"];
+    trace?: never;
+  };
+  "/gitlab-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List
+     * @description List all GitLab apps for the current team (and system-wide sources).
+     */
+    get: operations["list-gitlab-apps"];
+    put?: never;
+    /**
+     * Create GitLab App
+     * @description Create a new GitLab app (OAuth source). Credentials may be supplied later via the UI or update endpoint.
+     */
+    post: operations["create-gitlab-app"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/gitlab-apps/{gitlab_app_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete GitLab App
+     * @description Delete a GitLab app if it is not being used by any applications.
+     */
+    delete: operations["deleteGitlabApp"];
+    options?: never;
+    head?: never;
+    /**
+     * Update GitLab App
+     * @description Update an existing GitLab app.
+     */
+    patch: operations["updateGitlabApp"];
+    trace?: never;
+  };
+  "/hetzner/locations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner Locations
+     * @description Get all available Hetzner datacenter locations.
+     */
+    get: operations["get-hetzner-locations"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hetzner/server-types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner Server Types
+     * @description Get all available Hetzner server types (instance sizes).
+     */
+    get: operations["get-hetzner-server-types"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hetzner/images": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner Images
+     * @description Get all available Hetzner system images (operating systems).
+     */
+    get: operations["get-hetzner-images"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hetzner/ssh-keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner SSH Keys
+     * @description Get all SSH keys stored in the Hetzner account.
+     */
+    get: operations["get-hetzner-ssh-keys"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hetzner/firewalls": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner Firewalls
+     * @description Get all existing Hetzner firewalls for the current project.
+     */
+    get: operations["get-hetzner-firewalls"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/hetzner/networks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hetzner Networks
+     * @description Get all existing Hetzner private networks for the current project.
+     */
+    get: operations["get-hetzner-networks"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/hetzner": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Hetzner Server
+     * @description Create a new server on Hetzner and register it in Coolify.
+     */
+    post: operations["create-hetzner-server"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/notifications/email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get email notification settings
+     * @description Get the current team email notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-email-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update email notification settings
+     * @description Update the current team email notification settings.
+     */
+    patch: operations["update-current-team-email-notifications"];
+    trace?: never;
+  };
+  "/notifications/discord": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Discord notification settings
+     * @description Get the current team Discord notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-discord-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Discord notification settings
+     * @description Update the current team Discord notification settings.
+     */
+    patch: operations["update-current-team-discord-notifications"];
+    trace?: never;
+  };
+  "/notifications/slack": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Slack notification settings
+     * @description Get the current team Slack notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-slack-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Slack notification settings
+     * @description Update the current team Slack notification settings.
+     */
+    patch: operations["update-current-team-slack-notifications"];
+    trace?: never;
+  };
+  "/notifications/telegram": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Telegram notification settings
+     * @description Get the current team Telegram notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-telegram-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Telegram notification settings
+     * @description Update the current team Telegram notification settings.
+     */
+    patch: operations["update-current-team-telegram-notifications"];
+    trace?: never;
+  };
+  "/notifications/pushover": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Pushover notification settings
+     * @description Get the current team Pushover notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-pushover-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Pushover notification settings
+     * @description Update the current team Pushover notification settings.
+     */
+    patch: operations["update-current-team-pushover-notifications"];
+    trace?: never;
+  };
+  "/notifications/webhook": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get webhook notification settings
+     * @description Get the current team webhook notification settings. Encrypted secrets are only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner.
+     */
+    get: operations["get-current-team-webhook-notifications"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update webhook notification settings
+     * @description Update the current team webhook notification settings.
+     */
+    patch: operations["update-current-team-webhook-notifications"];
     trace?: never;
   };
   "/version": {
@@ -675,13 +1980,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Enable API
      * @description Enable API (only with root permissions).
      */
-    get: operations["enable-api"];
-    put?: never;
-    post?: never;
+    post: operations["enable-api"];
     delete?: never;
     options?: never;
     head?: never;
@@ -695,13 +2000,53 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Disable API
      * @description Disable API (only with root permissions).
      */
-    get: operations["disable-api"];
+    post: operations["disable-api"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/mcp/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
     put?: never;
-    post?: never;
+    /**
+     * Enable MCP Server
+     * @description Enable the MCP server endpoint at /mcp (only with root permissions).
+     */
+    post: operations["enable-mcp"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/mcp/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disable MCP Server
+     * @description Disable the MCP server endpoint at /mcp (only with root permissions).
+     */
+    post: operations["disable-mcp"];
     delete?: never;
     options?: never;
     head?: never;
@@ -800,6 +2145,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/projects/{uuid}/environments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Environments
+     * @description List all environments in a project.
+     */
+    get: operations["get-environments"];
+    put?: never;
+    /**
+     * Create Environment
+     * @description Create environment in project.
+     */
+    post: operations["create-environment"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{uuid}/environments/{environment_name_or_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Environment
+     * @description Delete environment by name or UUID. Environment must be empty.
+     */
+    delete: operations["delete-environment"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Environment
+     * @description Update environment by name or UUID within a project.
+     */
+    patch: operations["update-environment"];
+    trace?: never;
+  };
   "/resources": {
     parameters: {
       query?: never;
@@ -814,6 +2207,254 @@ export interface paths {
     get: operations["list-resources"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/s3-storages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List S3 Storages
+     * @description List all S3 storages for the authenticated team.
+     */
+    get: operations["list-s3-storages"];
+    put?: never;
+    /**
+     * Create S3 Storage
+     * @description Create a new S3 storage configuration for the authenticated team.
+     */
+    post: operations["create-s3-storage"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/s3-storages/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get S3 Storage
+     * @description Get S3 storage by UUID.
+     */
+    get: operations["get-s3-storage-by-uuid"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete S3 Storage
+     * @description Delete S3 storage by UUID.
+     */
+    delete: operations["delete-s3-storage-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update S3 Storage
+     * @description Update S3 storage by UUID.
+     */
+    patch: operations["update-s3-storage-by-uuid"];
+    trace?: never;
+  };
+  "/s3-storages/{uuid}/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Validate S3 Storage
+     * @description Validate an S3 storage connection using ListObjectsV2.
+     */
+    post: operations["validate-s3-storage-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/scheduled-tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Tasks
+     * @description List all scheduled tasks for an application.
+     */
+    get: operations["list-scheduled-tasks-by-application-uuid"];
+    put?: never;
+    /**
+     * Create Task
+     * @description Create a new scheduled task for an application.
+     */
+    post: operations["create-scheduled-task-by-application-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/scheduled-tasks/{task_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Task
+     * @description Delete a scheduled task for an application.
+     */
+    delete: operations["delete-scheduled-task-by-application-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Task
+     * @description Update a scheduled task for an application.
+     */
+    patch: operations["update-scheduled-task-by-application-uuid"];
+    trace?: never;
+  };
+  "/applications/{uuid}/scheduled-tasks/{task_uuid}/executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Executions
+     * @description List all executions for a scheduled task on an application.
+     */
+    get: operations["list-scheduled-task-executions-by-application-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/scheduled-tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Tasks
+     * @description List all scheduled tasks for a service.
+     */
+    get: operations["list-scheduled-tasks-by-service-uuid"];
+    put?: never;
+    /**
+     * Create Task
+     * @description Create a new scheduled task for a service.
+     */
+    post: operations["create-scheduled-task-by-service-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/scheduled-tasks/{task_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Task
+     * @description Delete a scheduled task for a service.
+     */
+    delete: operations["delete-scheduled-task-by-service-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Task
+     * @description Update a scheduled task for a service.
+     */
+    patch: operations["update-scheduled-task-by-service-uuid"];
+    trace?: never;
+  };
+  "/services/{uuid}/scheduled-tasks/{task_uuid}/executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Executions
+     * @description List all executions for a scheduled task on a service.
+     */
+    get: operations["list-scheduled-task-executions-by-service-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/scheduled-tasks/{task_uuid}/execute": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Execute Task
+     * @description Queue immediate execution of a scheduled task for an application.
+     */
+    post: operations["execute-scheduled-task-by-application-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/scheduled-tasks/{task_uuid}/execute": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Execute Task
+     * @description Queue immediate execution of a scheduled task for a service.
+     */
+    post: operations["execute-scheduled-task-by-service-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -867,6 +2508,366 @@ export interface paths {
      * @description Delete a private key.
      */
     delete: operations["delete-private-key-by-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/cloudflare-tunnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Cloudflare Tunnel settings
+     * @description Get Cloudflare Tunnel settings for a server owned by the authenticated team.
+     */
+    get: operations["get-server-cloudflare-tunnel"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Cloudflare Tunnel settings
+     * @description Update stored Cloudflare Tunnel settings for a server. Does not run remote cloudflared configuration; use enable/disable for the manual UI actions.
+     */
+    patch: operations["update-server-cloudflare-tunnel"];
+    trace?: never;
+  };
+  "/servers/{uuid}/cloudflare-tunnel/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Enable Cloudflare Tunnel (manual)
+     * @description Manually mark Cloudflare Tunnel as enabled for a server (matches UI manual enable). Does not deploy cloudflared remotely.
+     */
+    post: operations["enable-server-cloudflare-tunnel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/cloudflare-tunnel/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disable Cloudflare Tunnel
+     * @description Mark Cloudflare Tunnel as disabled and restore ip_previous when available. Does not remove the remote cloudflared container.
+     */
+    post: operations["disable-server-cloudflare-tunnel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/docker-cleanup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Docker cleanup settings
+     * @description Get Docker cleanup settings for a server owned by the authenticated team.
+     */
+    get: operations["get-server-docker-cleanup"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Docker cleanup settings
+     * @description Update Docker cleanup settings for a server owned by the authenticated team.
+     */
+    patch: operations["update-server-docker-cleanup"];
+    trace?: never;
+  };
+  "/servers/{uuid}/docker-cleanup/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Run Docker cleanup
+     * @description Dispatch a manual Docker cleanup job for a server owned by the authenticated team.
+     */
+    post: operations["run-server-docker-cleanup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/docker-cleanup/executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Docker cleanup executions
+     * @description List recent Docker cleanup execution logs for a server owned by the authenticated team.
+     */
+    get: operations["list-server-docker-cleanup-executions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/log-drains": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get log drain settings
+     * @description Get log drain settings for a server owned by the authenticated team. Sensitive fields require the read:sensitive or root token ability.
+     */
+    get: operations["get-server-log-drains"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update log drain settings
+     * @description Update New Relic, Axiom, or custom log drain settings for a server owned by the authenticated team.
+     */
+    patch: operations["update-server-log-drains"];
+    trace?: never;
+  };
+  "/servers/{uuid}/proxy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get server proxy
+     * @description Get proxy settings for a server owned by the authenticated team. The raw proxy configuration is only returned when the token has `read:sensitive` (or `root`) and the user is a team admin/owner, and only when already stored in the database (no remote fetch).
+     */
+    get: operations["get-server-proxy"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update server proxy
+     * @description Update proxy redirect settings, exact labels generation, and optionally the proxy type for a team-owned server.
+     */
+    patch: operations["update-server-proxy"];
+    trace?: never;
+  };
+  "/servers/{uuid}/proxy/configuration": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Save server proxy configuration
+     * @description Save the raw proxy Docker Compose configuration for a team-owned server. Multi-line configuration must be base64 encoded (same pattern as other compose payloads).
+     */
+    put: operations["save-server-proxy-configuration"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/proxy/restart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restart server proxy
+     * @description Queue a proxy restart for a team-owned server.
+     */
+    post: operations["restart-server-proxy"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/sentinel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Sentinel settings
+     * @description Get Sentinel settings for a server owned by the authenticated team. sentinel_token and sentinel_custom_url require the read:sensitive or root token ability.
+     */
+    get: operations["get-server-sentinel"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Sentinel settings
+     * @description Update Sentinel settings for a server owned by the authenticated team. Changing token/metrics timing fields may restart Sentinel.
+     */
+    patch: operations["update-server-sentinel"];
+    trace?: never;
+  };
+  "/servers/{uuid}/migrate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Migrate server to another Coolify instance
+     * @description One-shot handoff: export this server, import+claim on the target instance (using the provided token), then disable automations here. Requires read:sensitive and write.
+     */
+    post: operations["migrate-server-between-instances"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Export server transfer bundle
+     * @description Export a server and all resources hosted on it as a versioned transfer bundle for moving between Coolify instances. Requires read:sensitive.
+     */
+    get: operations["export-server-transfer-bundle"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import server transfer bundle
+     * @description Import a server transfer bundle into this Coolify instance (adopt mode by default).
+     */
+    post: operations["import-server-transfer-bundle"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Claim imported server
+     * @description Claim a managed host for this instance: write ownership file and rebind Sentinel.
+     */
+    post: operations["claim-server"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/transfer/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark server transferred
+     * @description Source-instance step: disable automations after a successful export/import handoff.
+     */
+    post: operations["complete-server-transfer"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/export/mailbox": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Write transfer bundle to server mailbox
+     * @description Write an export bundle to /data/coolify/exports on the managed host for air-gapped import.
+     */
+    post: operations["export-server-transfer-mailbox"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -971,13 +2972,265 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Validate
      * @description Validate server by UUID.
      */
-    get: operations["validate-server-by-uuid"];
+    post: operations["validate-server-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/applications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List service applications
+     * @description List compose service applications (containers) for a single service.
+     */
+    get: operations["list-service-applications-by-service-uuid"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/applications/{app_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get service application
+     * @description Get a single compose service application by service UUID and application UUID.
+     */
+    get: operations["get-service-application-by-service-and-app-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update service application
+     * @description Update fields for a compose service application. Use `url` for comma-separated public URLs (same rules as `urls[].url` on PATCH /services/{uuid}).
+     */
+    patch: operations["patch-service-application-by-service-and-app-uuid"];
+    trace?: never;
+  };
+  "/services/{uuid}/applications/{app_uuid}/logs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get service application logs
+     * @description Get Docker logs for a single compose service container.
+     */
+    get: operations["get-service-application-logs-by-service-and-app-uuid"];
+    put?: never;
+    /**
+     * Get service application logs
+     * @description Get Docker logs for a single compose service container.
+     */
+    post: operations["post-service-application-logs-by-service-and-app-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/applications/{app_uuid}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start or redeploy service application container
+     * @description Runs docker compose up for a single compose service (no-deps), optionally pulling the image and rebuilding.
+     */
+    post: operations["post-start-service-application-by-service-and-app-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/applications/{app_uuid}/restart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restart service application container
+     * @description Restarts a single compose service container.
+     */
+    post: operations["post-restart-service-application-by-service-and-app-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/applications/{app_uuid}/stop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Stop service application container
+     * @description Stops a single compose service container.
+     */
+    post: operations["post-stop-service-application-by-service-and-app-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/databases": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List service databases
+     * @description List compose databases for a single service.
+     */
+    get: operations["list-service-databases-by-service-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/databases/{database_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get service database
+     * @description Get a compose database by service UUID and database UUID.
+     */
+    get: operations["get-service-database-by-service-and-database-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update service database
+     * @description Update mutable fields for a compose service database.
+     */
+    patch: operations["patch-service-database-by-service-and-database-uuid"];
+    trace?: never;
+  };
+  "/services/{uuid}/databases/{database_uuid}/logs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get service database logs
+     * @description Get Docker logs for a compose database container.
+     */
+    get: operations["get-service-database-logs-by-service-and-database-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/databases/{database_uuid}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start or redeploy service database container
+     * @description Run docker compose up for a single compose database.
+     */
+    post: operations["start-service-database-by-service-and-database-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/databases/{database_uuid}/restart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restart service database container
+     * @description Restart a compose database container.
+     */
+    post: operations["restart-service-database-by-service-and-database-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/databases/{database_uuid}/stop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Stop service database container
+     * @description Stop a compose database container.
+     */
+    post: operations["stop-service-database-by-service-and-database-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -998,8 +3251,8 @@ export interface paths {
     get: operations["list-services"];
     put?: never;
     /**
-     * Create
-     * @description Create a one-click service
+     * Create service
+     * @description Create a one-click / custom service
      */
     post: operations["create-service"];
     delete?: never;
@@ -1027,6 +3280,30 @@ export interface paths {
      * @description Delete service by UUID.
      */
     delete: operations["delete-service-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update
+     * @description Update service by UUID.
+     */
+    patch: operations["update-service-by-uuid"];
+    trace?: never;
+  };
+  "/services/{uuid}/logs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get service logs.
+     * @description Get logs for a specific service sub-resource by service UUID. The `sub_service_name` query parameter must match the `name` field of one of the service applications or databases returned by `GET /services/{uuid}`.
+     */
+    get: operations["get-service-logs-by-uuid"];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -1100,6 +3377,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/services/{uuid}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Move
+     * @description Move service to another project/environment. This is a purely organizational change — running containers are not affected. Note: after moving, the service will pick up shared environment variables from the new environment on the next deployment.
+     */
+    post: operations["move-service-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/migrate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Migrate to Server
+     * @description Migrate a service to another destination/server owned by the authenticated team. Stops the service, optionally transfers persistent volume data when both servers are managed by Coolify, and updates database records. Redeploy after migration completes.
+     */
+    post: operations["migrate-service-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/services/{uuid}/start": {
     parameters: {
       query?: never;
@@ -1107,13 +3424,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Start
-     * @description Start service. `Post` request is also accepted.
+     * @description Start service.
      */
-    get: operations["start-service-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["start-service-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1127,13 +3444,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Stop
-     * @description Stop service. `Post` request is also accepted.
+     * @description Stop service.
      */
-    get: operations["stop-service-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["stop-service-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1147,17 +3464,369 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Restart
-     * @description Restart service. `Post` request is also accepted.
+     * @description Restart service.
      */
-    get: operations["restart-service-by-uuid"];
-    put?: never;
-    post?: never;
+    post: operations["restart-service-by-uuid"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/storages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Storages
+     * @description List all persistent storages and file storages by service UUID.
+     */
+    get: operations["list-storages-by-service-uuid"];
+    put?: never;
+    /**
+     * Create Storage
+     * @description Create a persistent storage or file storage for a service sub-resource.
+     */
+    post: operations["create-storage-by-service-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Storage
+     * @description Update a persistent storage or file storage by service UUID.
+     */
+    patch: operations["update-storage-by-service-uuid"];
+    trace?: never;
+  };
+  "/services/{uuid}/storages/{storage_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Storage
+     * @description Delete a persistent storage or file storage by service UUID.
+     */
+    delete: operations["delete-storage-by-service-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/tags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Tags
+     * @description List tags for a service by UUID.
+     */
+    get: operations["list-tags-by-service-uuid"];
+    put?: never;
+    /**
+     * Create Tag
+     * @description Add tag(s) to a service by UUID.
+     */
+    post: operations["create-tag-by-service-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/tags/{tag_uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Tag
+     * @description Remove a tag from a service by UUID.
+     */
+    delete: operations["delete-tag-by-service-uuid"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/clone": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Clone
+     * @description Clone a service to a destination owned by the authenticated team.
+     */
+    post: operations["clone-service-by-uuid"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/team/envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Team Shared Envs
+     * @description List shared environment variables for the current team (type=team).
+     */
+    get: operations["list-team-shared-envs"];
+    put?: never;
+    /**
+     * Create Team Shared Env
+     * @description Create a shared environment variable for the current team (type=team).
+     */
+    post: operations["create-team-shared-env"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/team/envs/{env_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Team Shared Env
+     * @description Delete a team shared environment variable by id.
+     */
+    delete: operations["delete-team-shared-env"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Team Shared Env
+     * @description Update a team shared environment variable by id.
+     */
+    patch: operations["update-team-shared-env"];
+    trace?: never;
+  };
+  "/projects/{uuid}/envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Project Shared Envs
+     * @description List shared environment variables for a project (type=project).
+     */
+    get: operations["list-project-shared-envs"];
+    put?: never;
+    /**
+     * Create Project Shared Env
+     * @description Create a shared environment variable for a project (type=project).
+     */
+    post: operations["create-project-shared-env"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{uuid}/envs/{env_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Project Shared Env
+     * @description Delete a project shared environment variable by id.
+     */
+    delete: operations["delete-project-shared-env"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Project Shared Env
+     * @description Update a project shared environment variable by id.
+     */
+    patch: operations["update-project-shared-env"];
+    trace?: never;
+  };
+  "/projects/{uuid}/environments/{environment_name_or_uuid}/envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Environment Shared Envs
+     * @description List shared environment variables for a project environment (type=environment).
+     */
+    get: operations["list-environment-shared-envs"];
+    put?: never;
+    /**
+     * Create Environment Shared Env
+     * @description Create a shared environment variable for a project environment (type=environment).
+     */
+    post: operations["create-environment-shared-env"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{uuid}/environments/{environment_name_or_uuid}/envs/{env_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Environment Shared Env
+     * @description Delete an environment shared environment variable by id.
+     */
+    delete: operations["delete-environment-shared-env"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Environment Shared Env
+     * @description Update an environment shared environment variable by id.
+     */
+    patch: operations["update-environment-shared-env"];
+    trace?: never;
+  };
+  "/servers/{uuid}/envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Server Shared Envs
+     * @description List shared environment variables for a server (type=server).
+     */
+    get: operations["list-server-shared-envs"];
+    put?: never;
+    /**
+     * Create Server Shared Env
+     * @description Create a shared environment variable for a server (type=server).
+     */
+    post: operations["create-server-shared-env"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/{uuid}/envs/{env_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Server Shared Env
+     * @description Delete a server shared environment variable by id.
+     */
+    delete: operations["delete-server-shared-env"];
+    options?: never;
+    head?: never;
+    /**
+     * Update Server Shared Env
+     * @description Update a server shared environment variable by id.
+     */
+    patch: operations["update-server-shared-env"];
+    trace?: never;
+  };
+  "/tags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List
+     * @description List all tags for the current team.
+     */
+    get: operations["list-tags"];
+    put?: never;
+    /**
+     * Create
+     * @description Create a tag for the current team.
+     */
+    post: operations["create-tag"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tags/{uuid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete
+     * @description Delete a tag for the current team. Detaches the tag from all resources via cascade.
+     */
+    delete: operations["delete-tag-by-uuid"];
+    options?: never;
+    head?: never;
+    /**
+     * Update
+     * @description Update a tag name for the current team.
+     */
+    patch: operations["update-tag-by-uuid"];
     trace?: never;
   };
   "/teams": {
@@ -1220,7 +3889,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/teams/current": {
+  "/team": {
     parameters: {
       query?: never;
       header?: never;
@@ -1229,9 +3898,9 @@ export interface paths {
     };
     /**
      * Authenticated Team
-     * @description Get currently authenticated team.
+     * @description Get the team bound to the API token.
      */
-    get: operations["get-current-team"];
+    get: operations["get-token-team"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1240,7 +3909,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/teams/current/members": {
+  "/team/members": {
     parameters: {
       query?: never;
       header?: never;
@@ -1249,11 +3918,243 @@ export interface paths {
     };
     /**
      * Authenticated Team Members
-     * @description Get currently authenticated team members.
+     * @description Get members of the team bound to the API token.
      */
-    get: operations["get-current-team-members"];
+    get: operations["get-token-team-members"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/storages/{storage_uuid}/backups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set application storage backup schedule
+     * @description Create or replace the backup schedule for an application persistent volume or directory storage.
+     */
+    put: operations["set-application-storage-backup-schedule"];
+    post?: never;
+    /**
+     * Delete application storage backup schedule
+     * @description Delete the backup schedule and its local and S3 archives for an application storage.
+     */
+    delete: operations["delete-application-storage-backup-schedule"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/storages/{storage_uuid}/backups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set database storage backup schedule
+     * @description Create or replace the backup schedule for a database persistent volume or directory storage.
+     */
+    put: operations["set-database-storage-backup-schedule"];
+    post?: never;
+    /**
+     * Delete database storage backup schedule
+     * @description Delete the backup schedule and its local and S3 archives for a database storage.
+     */
+    delete: operations["delete-database-storage-backup-schedule"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/storages/{storage_uuid}/backups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set service storage backup schedule
+     * @description Create or replace the backup schedule for a service persistent volume or directory storage.
+     */
+    put: operations["set-service-storage-backup-schedule"];
+    post?: never;
+    /**
+     * Delete service storage backup schedule
+     * @description Delete the backup schedule and its local and S3 archives for a service storage.
+     */
+    delete: operations["delete-service-storage-backup-schedule"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/applications/{uuid}/storages/{storage_uuid}/backups/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Run application storage backup
+     * @description Queue an immediate volume backup for an application storage that has a schedule.
+     */
+    post: operations["run-application-storage-backup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/databases/{uuid}/storages/{storage_uuid}/backups/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Run database storage backup
+     * @description Queue an immediate volume backup for a database storage that has a schedule.
+     */
+    post: operations["run-database-storage-backup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/services/{uuid}/storages/{storage_uuid}/backups/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Run service storage backup
+     * @description Queue an immediate volume backup for a service storage that has a schedule.
+     */
+    post: operations["run-service-storage-backup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/vultr/regions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Vultr Regions
+     * @description Get all available Vultr regions.
+     */
+    get: operations["get-vultr-regions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/vultr/plans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Vultr Plans
+     * @description Get all available Vultr plans.
+     */
+    get: operations["get-vultr-plans"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/vultr/os": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Vultr Operating Systems
+     * @description Get all available Vultr operating systems.
+     */
+    get: operations["get-vultr-operating-systems"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/vultr/ssh-keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Vultr SSH Keys
+     * @description Get all Vultr SSH keys available to the selected token.
+     */
+    get: operations["get-vultr-ssh-keys"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/servers/vultr": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Vultr Server
+     * @description Create a Vultr instance and link it as a Coolify server.
+     */
+    post: operations["create-vultr-server"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1264,6 +4165,61 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    VolumeBackupScheduleRequest: {
+      /** @example 0 2 * * * */
+      frequency: string;
+      /** @default true */
+      enabled: boolean;
+      /** @default false */
+      save_s3: boolean;
+      /** @default false */
+      disable_local_backup: boolean;
+      /** @default false */
+      stop_during_backup: boolean;
+      s3_storage_uuid?: string | null;
+      /** @default 7 */
+      retention_amount_locally: number;
+      /** @default 0 */
+      retention_days_locally: number;
+      /**
+       * Format: float
+       * @default 0
+       */
+      retention_max_storage_locally: number;
+      /** @default 7 */
+      retention_amount_s3: number;
+      /** @default 0 */
+      retention_days_s3: number;
+      /**
+       * Format: float
+       * @default 0
+       */
+      retention_max_storage_s3: number;
+      /** @default 3600 */
+      timeout: number;
+    };
+    VolumeBackupScheduleResponse: {
+      uuid: string;
+      message: string;
+      storage_uuid: string;
+      /** @enum {string} */
+      storage_type: "persistent" | "directory";
+      frequency: string;
+      enabled: boolean;
+      save_s3: boolean;
+      disable_local_backup: boolean;
+      stop_during_backup: boolean;
+      s3_storage_uuid?: string | null;
+      retention_amount_locally: number;
+      retention_days_locally: number;
+      /** Format: float */
+      retention_max_storage_locally: number;
+      retention_amount_s3: number;
+      retention_days_s3: number;
+      /** Format: float */
+      retention_max_storage_s3: number;
+      timeout: number;
+    };
     /** @description Application model */
     Application: {
       /** @description The application identifier in the database. */
@@ -1278,6 +4234,8 @@ export interface components {
       name?: string;
       /** @description The application domains. */
       fqdn?: string | null;
+      /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header. */
+      noindex_domains?: string[] | null;
       /** @description Configuration hash. */
       config_hash?: string;
       /** @description Git repository URL. */
@@ -1296,7 +4254,12 @@ export interface components {
        * @description Build pack.
        * @enum {string}
        */
-      build_pack?: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+      build_pack?:
+        | "nixpacks"
+        | "railpack"
+        | "static"
+        | "dockerfile"
+        | "dockercompose";
       /** @description Static image used when static site is deployed. */
       static_image?: string;
       /** @description Install command. */
@@ -1309,6 +4272,8 @@ export interface components {
       ports_exposes?: string;
       /** @description Ports mappings. */
       ports_mappings?: string | null;
+      /** @description Network aliases for Docker container. */
+      custom_network_aliases?: string | null;
       /** @description Base directory for all commands. */
       base_directory?: string;
       /** @description Publish directory. */
@@ -1337,6 +4302,13 @@ export interface components {
       health_check_retries?: number;
       /** @description Health check start period in seconds. */
       health_check_start_period?: number;
+      /**
+       * @description Health check type: http or cmd.
+       * @enum {string}
+       */
+      health_check_type?: "http" | "cmd";
+      /** @description Health check command for CMD type. */
+      health_check_command?: string | null;
       /** @description Memory limit. */
       limits_memory?: string;
       /** @description Memory swap limit. */
@@ -1355,6 +4327,8 @@ export interface components {
       status?: string;
       /** @description Preview URL template. */
       preview_url_template?: string;
+      /** @description Maximum container restart count before stopping. */
+      max_restart_count?: number;
       /** @description Destination type. */
       destination_type?: string;
       /** @description Destination identifier. */
@@ -1435,6 +4409,13 @@ export interface components {
       compose_parsing_version?: string;
       /** @description Custom Nginx configuration base64 encoded. */
       custom_nginx_configuration?: string | null;
+      /** @description HTTP Basic Authentication enabled. */
+      is_http_basic_auth_enabled?: boolean;
+      /** @description Username for HTTP Basic Authentication */
+      http_basic_auth_username?: string | null;
+      /** @description Password for HTTP Basic Authentication */
+      http_basic_auth_password?: string | null;
+      settings?: components["schemas"]["ApplicationSetting"];
     };
     /** @description Project model */
     ApplicationDeploymentQueue: {
@@ -1442,6 +4423,10 @@ export interface components {
       application_id?: string;
       deployment_uuid?: string;
       pull_request_id?: number;
+      docker_registry_image_tag?: string | null;
+      configuration_hash?: string | null;
+      configuration_snapshot?: Record<string, never> | null;
+      configuration_diff?: Record<string, never> | null;
       force_rebuild?: boolean;
       commit?: string;
       status?: string;
@@ -1462,6 +4447,44 @@ export interface components {
       rollback?: boolean;
       commit_message?: string;
     };
+    /** @description Application settings. */
+    ApplicationSetting: {
+      is_static?: boolean;
+      is_git_submodules_enabled?: boolean;
+      is_git_lfs_enabled?: boolean;
+      is_auto_deploy_enabled?: boolean;
+      is_force_https_enabled?: boolean;
+      is_debug_enabled?: boolean;
+      is_preview_deployments_enabled?: boolean;
+      is_log_drain_enabled?: boolean;
+      is_gpu_enabled?: boolean;
+      gpu_driver?: string | null;
+      gpu_count?: string | null;
+      gpu_device_ids?: string | null;
+      gpu_options?: string | null;
+      is_include_timestamps?: boolean;
+      is_swarm_only_worker_nodes?: boolean;
+      is_raw_compose_deployment_enabled?: boolean;
+      is_build_server_enabled?: boolean;
+      is_consistent_container_name_enabled?: boolean;
+      is_gzip_enabled?: boolean;
+      is_stripprefix_enabled?: boolean;
+      connect_to_docker_network?: boolean;
+      custom_internal_name?: string | null;
+      is_container_label_escape_enabled?: boolean;
+      is_env_sorting_enabled?: boolean;
+      is_container_label_readonly_enabled?: boolean;
+      is_preserve_repository_enabled?: boolean;
+      disable_build_cache?: boolean;
+      is_spa?: boolean;
+      is_git_shallow_clone_enabled?: boolean;
+      is_pr_deployments_public_enabled?: boolean;
+      use_build_secrets?: boolean;
+      inject_build_args_to_dockerfile?: boolean;
+      include_source_commit_in_build?: boolean;
+      docker_images_to_keep?: number;
+      stop_grace_period?: number | null;
+    };
     /** @description Environment model */
     Environment: {
       id?: number;
@@ -1477,15 +4500,17 @@ export interface components {
       uuid?: string;
       resourceable_type?: string;
       resourceable_id?: number;
-      is_build_time?: boolean;
       is_literal?: boolean;
       is_multiline?: boolean;
       is_preview?: boolean;
+      is_runtime?: boolean;
+      is_buildtime?: boolean;
       is_shared?: boolean;
       is_shown_once?: boolean;
       key?: string;
       value?: string;
       real_value?: string;
+      comment?: string | null;
       version?: string;
       created_at?: string;
       updated_at?: string;
@@ -1498,6 +4523,10 @@ export interface components {
       description?: string;
       /** Format: private-key */
       private_key?: string;
+      /** @description The public key of the private key. */
+      public_key?: string;
+      /** @description The fingerprint of the private key. */
+      fingerprint?: string;
       is_git_related?: boolean;
       team_id?: number;
       created_at?: string;
@@ -1509,8 +4538,71 @@ export interface components {
       uuid?: string;
       name?: string;
       description?: string;
-      /** @description The environments of the project. */
-      environments?: components["schemas"]["Environment"][];
+    };
+    /** @description Scheduled Task model */
+    ScheduledTask: {
+      /** @description The unique identifier of the scheduled task in the database. */
+      id?: number;
+      /** @description The unique identifier of the scheduled task. */
+      uuid?: string;
+      /** @description The flag to indicate if the scheduled task is enabled. */
+      enabled?: boolean;
+      /** @description The name of the scheduled task. */
+      name?: string;
+      /** @description The command to execute. */
+      command?: string;
+      /** @description The frequency of the scheduled task. */
+      frequency?: string;
+      /** @description The container where the command should be executed. */
+      container?: string | null;
+      /** @description The timeout of the scheduled task in seconds. */
+      timeout?: number;
+      /**
+       * Format: date-time
+       * @description The date and time when the scheduled task was created.
+       */
+      created_at?: string;
+      /**
+       * Format: date-time
+       * @description The date and time when the scheduled task was last updated.
+       */
+      updated_at?: string;
+    };
+    /** @description Scheduled Task Execution model */
+    ScheduledTaskExecution: {
+      /** @description The unique identifier of the execution. */
+      uuid?: string;
+      /**
+       * @description The status of the execution.
+       * @enum {string}
+       */
+      status?: "success" | "failed" | "running";
+      /** @description The output message of the execution. */
+      message?: string | null;
+      /** @description The number of retries. */
+      retry_count?: number;
+      /** @description Duration in seconds. */
+      duration?: number | null;
+      /**
+       * Format: date-time
+       * @description When the execution started.
+       */
+      started_at?: string | null;
+      /**
+       * Format: date-time
+       * @description When the execution finished.
+       */
+      finished_at?: string | null;
+      /**
+       * Format: date-time
+       * @description When the record was created.
+       */
+      created_at?: string;
+      /**
+       * Format: date-time
+       * @description When the record was last updated.
+       */
+      updated_at?: string;
     };
     /** @description Server model */
     Server: {
@@ -1553,6 +4645,7 @@ export interface components {
     ServerSetting: {
       id?: number;
       concurrent_builds?: number;
+      deployment_queue_limit?: number;
       dynamic_timeout?: number;
       force_disabled?: boolean;
       force_server_cleanup?: boolean;
@@ -1568,6 +4661,7 @@ export interface components {
       is_sentinel_enabled?: boolean;
       is_swarm_manager?: boolean;
       is_swarm_worker?: boolean;
+      is_terminal_enabled?: boolean;
       is_usable?: boolean;
       logdrain_axiom_api_key?: string;
       logdrain_axiom_dataset_name?: string;
@@ -1589,6 +4683,8 @@ export interface components {
       delete_unused_volumes?: boolean;
       /** @description The flag to indicate if the unused networks should be deleted. */
       delete_unused_networks?: boolean;
+      /** @description SSH connection timeout in seconds. */
+      connection_timeout?: number;
     };
     /** @description Service model */
     Service: {
@@ -1628,6 +4724,26 @@ export interface components {
       updated_at?: string;
       /** @description The date and time when the service was deleted. */
       deleted_at?: string;
+    };
+    /** @description A Docker network destination attached to a server. */
+    Destination: {
+      uuid?: string;
+      name?: string;
+      network?: string;
+      /** @enum {string} */
+      type?: "standalone" | "swarm";
+      server_uuid?: string;
+      /** Format: date-time */
+      created_at?: string;
+      /** Format: date-time */
+      updated_at?: string;
+    };
+    /** @description Tag model */
+    Tag: {
+      uuid?: string;
+      name?: string;
+      created_at?: string;
+      updated_at?: string;
     };
     /** @description Team model */
     Team: {
@@ -1709,6 +4825,44 @@ export interface components {
         };
       };
     };
+    /** @description Validation error. */
+    422: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          /** @example Validation error. */
+          message?: string;
+          /** @example {
+           *       "name": [
+           *         "The name field is required."
+           *       ],
+           *       "api_url": [
+           *         "The api url field is required.",
+           *         "The api url format is invalid."
+           *       ]
+           *     } */
+          errors?: {
+            [key: string]: string[];
+          };
+        };
+      };
+    };
+    /** @description Rate limit exceeded. */
+    429: {
+      headers: {
+        /** @description Number of seconds to wait before retrying. */
+        "Retry-After"?: number;
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          /** @example Rate limit exceeded. Please try again later. */
+          message?: string;
+        };
+      };
+    };
   };
   parameters: never;
   requestBodies: never;
@@ -1719,7 +4873,10 @@ export type $defs = Record<string, never>;
 export interface operations {
   "list-applications": {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Filter applications by tag name. */
+        tag?: string;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -1766,17 +4923,24 @@ export interface operations {
            * @description The build pack type.
            * @enum {string}
            */
-          build_pack: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+          build_pack:
+            | "nixpacks"
+            | "railpack"
+            | "static"
+            | "dockerfile"
+            | "dockercompose";
           /** @description The ports to expose. */
-          ports_exposes: string;
+          ports_exposes?: string;
           /** @description The destination UUID. */
           destination_uuid?: string;
           /** @description The application name. */
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The git commit SHA. */
           git_commit_sha?: string;
           /** @description The docker registry image name. */
@@ -1785,6 +4949,14 @@ export interface operations {
           docker_registry_image_tag?: string;
           /** @description The flag to indicate if the application is static. */
           is_static?: boolean;
+          /** @description The flag to indicate if the application is a single-page application (SPA). Only relevant when is_static is true. */
+          is_spa?: boolean;
+          /** @description The flag to indicate if auto-deploy is enabled on git push. Defaults to true. */
+          is_auto_deploy_enabled?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /**
            * @description The static image.
            * @enum {string}
@@ -1869,20 +5041,108 @@ export interface operations {
           instant_deploy?: boolean;
           /** @description The Dockerfile content. */
           dockerfile?: string;
+          /** @description The Dockerfile location in the repository. */
+          dockerfile_location?: string;
           /** @description The Docker Compose location. */
           docker_compose_location?: string;
-          /** @description The Docker Compose raw content. */
-          docker_compose_raw?: string;
           /** @description The Docker Compose custom start command. */
           docker_compose_custom_start_command?: string;
           /** @description The Docker Compose custom build command. */
           docker_compose_custom_build_command?: string;
-          /** @description The Docker Compose domains. */
-          docker_compose_domains?: unknown[];
+          /** @description Array of URLs to be applied to containers of a dockercompose application. */
+          docker_compose_domains?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io") */
+            domain?: string;
+            /**
+             * @description Per-service www/non-www redirect for this compose service.
+             * @enum {string|null}
+             */
+            redirect?: "www" | "non-www" | "both" | null;
+          }[];
           /** @description The watch paths. */
           watch_paths?: string;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /**
+           * @description Use Docker Build Secrets for build-time environment variables.
+           * @default false
+           */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description HTTP Basic Authentication enabled. */
+          is_http_basic_auth_enabled?: boolean;
+          /** @description Username for HTTP Basic Authentication */
+          http_basic_auth_username?: string | null;
+          /** @description Password for HTTP Basic Authentication */
+          http_basic_auth_password?: string | null;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description If true and domains is empty, auto-generate a domain using the server's wildcard domain or sslip.io fallback. Default: true.
+           * @default true
+           */
+          autogenerate_domain?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the application. */
+          tags?: string[];
+          /**
+           * @description Preserve repository during deployment.
+           * @default false
+           */
+          is_preserve_repository_enabled?: boolean;
         };
       };
     };
@@ -1900,6 +5160,35 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
     };
   };
   "create-private-github-app-application": {
@@ -1928,20 +5217,27 @@ export interface operations {
           /** @description The git branch. */
           git_branch: string;
           /** @description The ports to expose. */
-          ports_exposes: string;
+          ports_exposes?: string;
           /** @description The destination UUID. */
           destination_uuid?: string;
           /**
            * @description The build pack type.
            * @enum {string}
            */
-          build_pack: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+          build_pack:
+            | "nixpacks"
+            | "railpack"
+            | "static"
+            | "dockerfile"
+            | "dockercompose";
           /** @description The application name. */
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The git commit SHA. */
           git_commit_sha?: string;
           /** @description The docker registry image name. */
@@ -1950,6 +5246,14 @@ export interface operations {
           docker_registry_image_tag?: string;
           /** @description The flag to indicate if the application is static. */
           is_static?: boolean;
+          /** @description The flag to indicate if the application is a single-page application (SPA). Only relevant when is_static is true. */
+          is_spa?: boolean;
+          /** @description The flag to indicate if auto-deploy is enabled on git push. Defaults to true. */
+          is_auto_deploy_enabled?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /**
            * @description The static image.
            * @enum {string}
@@ -2034,20 +5338,108 @@ export interface operations {
           instant_deploy?: boolean;
           /** @description The Dockerfile content. */
           dockerfile?: string;
+          /** @description The Dockerfile location in the repository */
+          dockerfile_location?: string;
           /** @description The Docker Compose location. */
           docker_compose_location?: string;
-          /** @description The Docker Compose raw content. */
-          docker_compose_raw?: string;
           /** @description The Docker Compose custom start command. */
           docker_compose_custom_start_command?: string;
           /** @description The Docker Compose custom build command. */
           docker_compose_custom_build_command?: string;
-          /** @description The Docker Compose domains. */
-          docker_compose_domains?: unknown[];
+          /** @description Array of URLs to be applied to containers of a dockercompose application. */
+          docker_compose_domains?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io") */
+            domain?: string;
+            /**
+             * @description Per-service www/non-www redirect for this compose service.
+             * @enum {string|null}
+             */
+            redirect?: "www" | "non-www" | "both" | null;
+          }[];
           /** @description The watch paths. */
           watch_paths?: string;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /**
+           * @description Use Docker Build Secrets for build-time environment variables.
+           * @default false
+           */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description HTTP Basic Authentication enabled. */
+          is_http_basic_auth_enabled?: boolean;
+          /** @description Username for HTTP Basic Authentication */
+          http_basic_auth_username?: string | null;
+          /** @description Password for HTTP Basic Authentication */
+          http_basic_auth_password?: string | null;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description If true and domains is empty, auto-generate a domain using the server's wildcard domain or sslip.io fallback. Default: true.
+           * @default true
+           */
+          autogenerate_domain?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the application. */
+          tags?: string[];
+          /**
+           * @description Preserve repository during deployment.
+           * @default false
+           */
+          is_preserve_repository_enabled?: boolean;
         };
       };
     };
@@ -2065,6 +5457,35 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
     };
   };
   "create-private-deploy-key-application": {
@@ -2093,20 +5514,27 @@ export interface operations {
           /** @description The git branch. */
           git_branch: string;
           /** @description The ports to expose. */
-          ports_exposes: string;
+          ports_exposes?: string;
           /** @description The destination UUID. */
           destination_uuid?: string;
           /**
            * @description The build pack type.
            * @enum {string}
            */
-          build_pack: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+          build_pack:
+            | "nixpacks"
+            | "railpack"
+            | "static"
+            | "dockerfile"
+            | "dockercompose";
           /** @description The application name. */
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The git commit SHA. */
           git_commit_sha?: string;
           /** @description The docker registry image name. */
@@ -2115,6 +5543,14 @@ export interface operations {
           docker_registry_image_tag?: string;
           /** @description The flag to indicate if the application is static. */
           is_static?: boolean;
+          /** @description The flag to indicate if the application is a single-page application (SPA). Only relevant when is_static is true. */
+          is_spa?: boolean;
+          /** @description The flag to indicate if auto-deploy is enabled on git push. Defaults to true. */
+          is_auto_deploy_enabled?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /**
            * @description The static image.
            * @enum {string}
@@ -2199,20 +5635,108 @@ export interface operations {
           instant_deploy?: boolean;
           /** @description The Dockerfile content. */
           dockerfile?: string;
+          /** @description The Dockerfile location in the repository. */
+          dockerfile_location?: string;
           /** @description The Docker Compose location. */
           docker_compose_location?: string;
-          /** @description The Docker Compose raw content. */
-          docker_compose_raw?: string;
           /** @description The Docker Compose custom start command. */
           docker_compose_custom_start_command?: string;
           /** @description The Docker Compose custom build command. */
           docker_compose_custom_build_command?: string;
-          /** @description The Docker Compose domains. */
-          docker_compose_domains?: unknown[];
+          /** @description Array of URLs to be applied to containers of a dockercompose application. */
+          docker_compose_domains?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io") */
+            domain?: string;
+            /**
+             * @description Per-service www/non-www redirect for this compose service.
+             * @enum {string|null}
+             */
+            redirect?: "www" | "non-www" | "both" | null;
+          }[];
           /** @description The watch paths. */
           watch_paths?: string;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /**
+           * @description Use Docker Build Secrets for build-time environment variables.
+           * @default false
+           */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description HTTP Basic Authentication enabled. */
+          is_http_basic_auth_enabled?: boolean;
+          /** @description Username for HTTP Basic Authentication */
+          http_basic_auth_username?: string | null;
+          /** @description Password for HTTP Basic Authentication */
+          http_basic_auth_password?: string | null;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description If true and domains is empty, auto-generate a domain using the server's wildcard domain or sslip.io fallback. Default: true.
+           * @default true
+           */
+          autogenerate_domain?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the application. */
+          tags?: string[];
+          /**
+           * @description Preserve repository during deployment.
+           * @default false
+           */
+          is_preserve_repository_enabled?: boolean;
         };
       };
     };
@@ -2230,6 +5754,35 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
     };
   };
   "create-dockerfile-application": {
@@ -2257,7 +5810,7 @@ export interface operations {
            * @description The build pack type.
            * @enum {string}
            */
-          build_pack?: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+          build_pack?: "dockerfile";
           /** @description The ports to expose. */
           ports_exposes?: string;
           /** @description The destination UUID. */
@@ -2266,8 +5819,10 @@ export interface operations {
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The docker registry image name. */
           docker_registry_image_name?: string;
           /** @description The docker registry image tag. */
@@ -2341,8 +5896,85 @@ export interface operations {
           redirect?: "www" | "non-www" | "both" | null;
           /** @description The flag to indicate if the application should be deployed instantly. */
           instant_deploy?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /**
+           * @description Use Docker Build Secrets for build-time environment variables.
+           * @default false
+           */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description HTTP Basic Authentication enabled. */
+          is_http_basic_auth_enabled?: boolean;
+          /** @description Username for HTTP Basic Authentication */
+          http_basic_auth_username?: string | null;
+          /** @description Password for HTTP Basic Authentication */
+          http_basic_auth_password?: string | null;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description If true and domains is empty, auto-generate a domain using the server's wildcard domain or sslip.io fallback. Default: true.
+           * @default true
+           */
+          autogenerate_domain?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the application. */
+          tags?: string[];
         };
       };
     };
@@ -2360,6 +5992,35 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
     };
   };
   "create-dockerimage-application": {
@@ -2386,15 +6047,17 @@ export interface operations {
           /** @description The docker registry image tag. */
           docker_registry_image_tag?: string;
           /** @description The ports to expose. */
-          ports_exposes: string;
+          ports_exposes?: string;
           /** @description The destination UUID. */
           destination_uuid?: string;
           /** @description The application name. */
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The ports mappings. */
           ports_mappings?: string;
           /** @description Health check enabled. */
@@ -2462,8 +6125,85 @@ export interface operations {
           redirect?: "www" | "non-www" | "both" | null;
           /** @description The flag to indicate if the application should be deployed instantly. */
           instant_deploy?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /**
+           * @description Use Docker Build Secrets for build-time environment variables.
+           * @default false
+           */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description HTTP Basic Authentication enabled. */
+          is_http_basic_auth_enabled?: boolean;
+          /** @description Username for HTTP Basic Authentication */
+          http_basic_auth_username?: string | null;
+          /** @description Password for HTTP Basic Authentication */
+          http_basic_auth_password?: string | null;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description If true and domains is empty, auto-generate a domain using the server's wildcard domain or sslip.io fallback. Default: true.
+           * @default true
+           */
+          autogenerate_domain?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the application. */
+          tags?: string[];
         };
       };
     };
@@ -2481,56 +6221,35 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
-    };
-  };
-  "create-dockercompose-application": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Application object that needs to be created. */
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @description The project UUID. */
-          project_uuid: string;
-          /** @description The server UUID. */
-          server_uuid: string;
-          /** @description The environment name. You need to provide at least one of environment_name or environment_uuid. */
-          environment_name: string;
-          /** @description The environment UUID. You need to provide at least one of environment_name or environment_uuid. */
-          environment_uuid: string;
-          /** @description The Docker Compose raw content. */
-          docker_compose_raw: string;
-          /** @description The destination UUID if the server has more than one destinations. */
-          destination_uuid?: string;
-          /** @description The application name. */
-          name?: string;
-          /** @description The application description. */
-          description?: string;
-          /** @description The flag to indicate if the application should be deployed instantly. */
-          instant_deploy?: boolean;
-          /** @description Use build server. */
-          use_build_server?: boolean | null;
-        };
-      };
-    };
-    responses: {
-      /** @description Application created successfully. */
-      201: {
+      /** @description Domain conflicts detected. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
-            uuid?: string;
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
           };
         };
       };
-      400: components["responses"]["400"];
-      401: components["responses"]["401"];
     };
   };
   "get-application-by-uuid": {
@@ -2601,7 +6320,10 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
       cookie?: never;
     };
     /** @description Application updated. */
@@ -2628,13 +6350,20 @@ export interface operations {
            * @description The build pack type.
            * @enum {string}
            */
-          build_pack?: "nixpacks" | "static" | "dockerfile" | "dockercompose";
+          build_pack?:
+            | "nixpacks"
+            | "railpack"
+            | "static"
+            | "dockerfile"
+            | "dockercompose";
           /** @description The application name. */
           name?: string;
           /** @description The application description. */
           description?: string;
-          /** @description The application domains. */
+          /** @description The application URLs in a comma-separated list. */
           domains?: string;
+          /** @description The subset of the application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the application domains are ignored. */
+          noindex_domains?: string[];
           /** @description The git commit SHA. */
           git_commit_sha?: string;
           /** @description The docker registry image name. */
@@ -2643,6 +6372,14 @@ export interface operations {
           docker_registry_image_tag?: string;
           /** @description The flag to indicate if the application is static. */
           is_static?: boolean;
+          /** @description The flag to indicate if the application is a single-page application (SPA). Only relevant when is_static is true. */
+          is_spa?: boolean;
+          /** @description The flag to indicate if auto-deploy is enabled on git push. Defaults to true. */
+          is_auto_deploy_enabled?: boolean;
+          /** @description The flag to indicate if HTTPS is forced. Defaults to true. */
+          is_force_https_enabled?: boolean;
+          /** @description Enable preview deployments for pull requests. */
+          is_preview_deployments_enabled?: boolean;
           /** @description The install command. */
           install_command?: string;
           /** @description The build command. */
@@ -2722,20 +6459,89 @@ export interface operations {
           instant_deploy?: boolean;
           /** @description The Dockerfile content. */
           dockerfile?: string;
+          /** @description The Dockerfile location in the repository. */
+          dockerfile_location?: string;
           /** @description The Docker Compose location. */
           docker_compose_location?: string;
-          /** @description The Docker Compose raw content. */
-          docker_compose_raw?: string;
           /** @description The Docker Compose custom start command. */
           docker_compose_custom_start_command?: string;
           /** @description The Docker Compose custom build command. */
           docker_compose_custom_build_command?: string;
-          /** @description The Docker Compose domains. */
-          docker_compose_domains?: unknown[];
+          /** @description Array of URLs to be applied to containers of a dockercompose application. */
+          docker_compose_domains?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io") */
+            domain?: string;
+            /**
+             * @description Per-service www/non-www redirect for this compose service.
+             * @enum {string|null}
+             */
+            redirect?: "www" | "non-www" | "both" | null;
+          }[];
           /** @description The watch paths. */
           watch_paths?: string;
           /** @description Use build server. */
           use_build_server?: boolean | null;
+          /** @description Use Docker Build Secrets for build-time environment variables. */
+          use_build_secrets?: boolean;
+          /** @description Clone Git submodules. */
+          is_git_submodules_enabled?: boolean;
+          /** @description Enable Git LFS. */
+          is_git_lfs_enabled?: boolean;
+          /** @description Use a shallow Git clone. */
+          is_git_shallow_clone_enabled?: boolean;
+          /** @description Disable the build cache. */
+          disable_build_cache?: boolean;
+          /** @description Inject build arguments into the Dockerfile build. */
+          inject_build_args_to_dockerfile?: boolean;
+          /** @description Include the source commit in the build. */
+          include_source_commit_in_build?: boolean;
+          /** @description Sort environment variables. */
+          is_env_sorting_enabled?: boolean;
+          /** @description Make pull request deployments public. */
+          is_pr_deployments_public_enabled?: boolean;
+          /** @description Container stop grace period in seconds. */
+          stop_grace_period?: number | null;
+          /** @description Number of Docker images to retain. */
+          docker_images_to_keep?: number;
+          /** @description Enable gzip compression. */
+          is_gzip_enabled?: boolean;
+          /** @description Enable path prefix stripping. */
+          is_stripprefix_enabled?: boolean;
+          /** @description Deploy the raw Docker Compose definition. */
+          is_raw_compose_deployment_enabled?: boolean;
+          /** @description Enable log drain for the application. */
+          is_log_drain_enabled?: boolean;
+          /** @description Enable GPU support. */
+          is_gpu_enabled?: boolean;
+          /** @description GPU driver name. */
+          gpu_driver?: string | null;
+          /** @description Number of GPUs to allocate. */
+          gpu_count?: string | null;
+          /** @description Comma-separated GPU device IDs. */
+          gpu_device_ids?: string | null;
+          /** @description Additional GPU options. */
+          gpu_options?: string | null;
+          /** @description Use a consistent container name across deployments. */
+          is_consistent_container_name_enabled?: boolean;
+          /** @description Custom internal container name. */
+          custom_internal_name?: string | null;
+          /** @description Preview URL template. */
+          preview_url_template?: string;
+          /** @description Maximum container restart count before stopping. */
+          max_restart_count?: number;
+          /** @description The flag to connect the service to the predefined Docker network. */
+          connect_to_docker_network?: boolean;
+          /** @description Force domain usage even if conflicts are detected. Default is false. */
+          force_domain_override?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. So if you write $ in the labels, it will be saved as $$. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Preserve git repository during application update. If false, the existing repository will be removed and replaced with the new one. If true, the existing repository will be kept and the new one will be ignored. Default is false. */
+          is_preserve_repository_enabled?: boolean;
         };
       };
     };
@@ -2748,6 +6554,68 @@ export interface operations {
         content: {
           "application/json": {
             uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
+    };
+  };
+  "get-application-logs-by-uuid": {
+    parameters: {
+      query?: {
+        /** @description Number of lines to show from the end of the logs. */
+        lines?: number;
+        /** @description Show timestamps in the logs. */
+        show_timestamps?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get application logs by UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
           };
         };
       };
@@ -2802,8 +6670,6 @@ export interface operations {
           value?: string;
           /** @description The flag to indicate if the environment variable is used in preview deployments. */
           is_preview?: boolean;
-          /** @description The flag to indicate if the environment variable is used in build time. */
-          is_build_time?: boolean;
           /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
           is_literal?: boolean;
           /** @description The flag to indicate if the environment variable is multiline. */
@@ -2851,8 +6717,6 @@ export interface operations {
           value: string;
           /** @description The flag to indicate if the environment variable is used in preview deployments. */
           is_preview?: boolean;
-          /** @description The flag to indicate if the environment variable is used in build time. */
-          is_build_time?: boolean;
           /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
           is_literal?: boolean;
           /** @description The flag to indicate if the environment variable is multiline. */
@@ -2869,10 +6733,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            /** @example Environment variable updated. */
-            message?: string;
-          };
+          "application/json": components["schemas"]["EnvironmentVariable"];
         };
       };
       400: components["responses"]["400"];
@@ -2901,8 +6762,6 @@ export interface operations {
             value?: string;
             /** @description The flag to indicate if the environment variable is used in preview deployments. */
             is_preview?: boolean;
-            /** @description The flag to indicate if the environment variable is used in build time. */
-            is_build_time?: boolean;
             /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
             is_literal?: boolean;
             /** @description The flag to indicate if the environment variable is multiline. */
@@ -2920,10 +6779,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            /** @example Environment variables updated. */
-            message?: string;
-          };
+          "application/json": components["schemas"]["EnvironmentVariable"][];
         };
       };
       400: components["responses"]["400"];
@@ -3006,7 +6862,10 @@ export interface operations {
   };
   "stop-application-by-uuid": {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Perform docker cleanup (prune networks, volumes, etc.). */
+        docker_cleanup?: boolean;
+      };
       header?: never;
       path: {
         /** @description UUID of the application. */
@@ -3067,7 +6926,7 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
-  "execute-command-application": {
+  "move-application-by-uuid": {
     parameters: {
       query?: never;
       header?: never;
@@ -3077,30 +6936,910 @@ export interface operations {
       };
       cookie?: never;
     };
-    /** @description Command to execute. */
+    /** @description Target environment to move the application to. */
     requestBody: {
       content: {
         "application/json": {
-          /** @description Command to execute. */
-          command?: string;
+          /** @description UUID of the target environment. */
+          environment_uuid: string;
         };
       };
     };
     responses: {
-      /** @description Execute a command on the application's current container. */
+      /** @description Application moved successfully. */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
-            /** @example Command executed. */
+            /** @example Application moved successfully. */
             message?: string;
-            response?: string;
+            uuid?: string;
+            project_uuid?: string;
+            environment_uuid?: string;
           };
         };
       };
       400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "migrate-application-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the target destination. */
+          destination_uuid: string;
+          /**
+           * @description Whether to transfer persistent volume data when migrating across servers.
+           * @default true
+           */
+          migrate_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Application migration started or completed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-storages-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All storages by application UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            persistent_storages?: Record<string, never>[];
+            file_storages?: Record<string, never>[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-storage-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The type of storage.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description Volume name (persistent only, required for persistent). */
+          name?: string;
+          /** @description The container mount path. */
+          mount_path: string;
+          /** @description The host path (persistent only, optional). */
+          host_path?: string | null;
+          /** @description File content (file only, optional). */
+          content?: string | null;
+          /** @description Whether this is a directory mount (file only, default false). */
+          is_directory?: boolean;
+          /** @description Host directory path (required when is_directory is true). */
+          fs_path?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "update-storage-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Storage updated. For read-only storages (from docker-compose or services), only is_preview_suffix_enabled can be updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The UUID of the storage (preferred). */
+          uuid?: string;
+          /** @description The ID of the storage (deprecated, use uuid instead). */
+          id?: number;
+          /**
+           * @description The type of storage: persistent or file.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description Whether to add -pr-N suffix for preview deployments. */
+          is_preview_suffix_enabled?: boolean;
+          /** @description The volume name (persistent only, not allowed for read-only storages). */
+          name?: string;
+          /** @description The container mount path (not allowed for read-only storages). */
+          mount_path?: string;
+          /** @description The host path (persistent only, not allowed for read-only storages). */
+          host_path?: string | null;
+          /** @description The file content (file only, not allowed for read-only storages). */
+          content?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-storage-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-preview-deployment-by-pull-request-id": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description Pull request ID of the preview to delete. */
+        pull_request_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Preview deletion queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-tags-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of tags. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-tag-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The tag name (min 2 characters). Required if tag_names is not provided. */
+          tag_name?: string;
+          /** @description Array of tag names (each min 2 characters). Required if tag_name is not provided. */
+          tag_names?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Tags added successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-tag-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the tag. */
+        tag_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag removed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "clone-application-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the destination to clone into. */
+          destination_uuid: string;
+          /** @description Optional name for the cloned application. */
+          name?: string | null;
+          /**
+           * @description Whether to clone volume data.
+           * @default false
+           */
+          clone_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Application cloned. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            /** @example Application cloned. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-application-rollback-images": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Rollback images. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            current?: string | null;
+            images?: {
+              tag?: string;
+              created_at?: string;
+              is_current?: boolean;
+            }[];
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "rollback-application-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Image tag / commit to roll back to. */
+          commit: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Rollback deployment queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+            deployment_uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-application-destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Application destinations. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "add-application-destination": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          destination_uuid: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Destination attached. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "remove-application-destination": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the destination. */
+        destination_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Destination detached. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-cloud-init-scripts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloud-init scripts for the team. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "create-cloud-init-script": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+          /** @description Bash script (#!) or cloud-config YAML. */
+          script: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Cloud-init script created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-cloud-init-script-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloud-init script. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+    };
+  };
+  "delete-cloud-init-script-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloud-init script deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+    };
+  };
+  "update-cloud-init-script-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          script?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Cloud-init script updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-cloud-tokens": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all cloud provider tokens. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            name?: string;
+            /** @enum {string} */
+            provider?: "hetzner" | "digitalocean" | "vultr";
+            team_id?: number;
+            servers_count?: number;
+            created_at?: string;
+            updated_at?: string;
+          }[];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "create-cloud-token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Cloud provider token details */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The cloud provider.
+           * @example hetzner
+           * @enum {string}
+           */
+          provider: "hetzner" | "digitalocean" | "vultr";
+          /**
+           * @description The API token for the cloud provider.
+           * @example your-api-token-here
+           */
+          token: string;
+          /**
+           * @description A friendly name for the token.
+           * @example My Hetzner Token
+           */
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Cloud provider token created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /**
+             * @description The UUID of the token.
+             * @example og888os
+             */
+            uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-cloud-token-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Token UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get cloud provider token by UUID */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            name?: string;
+            provider?: string;
+            team_id?: number;
+            servers_count?: number;
+            created_at?: string;
+            updated_at?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "delete-cloud-token-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the cloud provider token. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloud provider token deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Cloud provider token deleted. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-cloud-token-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Token UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Cloud provider token updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The friendly name for the token. */
+          name?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Cloud provider token updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "validate-cloud-token-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Token UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Token validation result. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example true */
+            valid?: boolean;
+            /** @example Token is valid. */
+            message?: string;
+          };
+        };
+      };
       401: components["responses"]["401"];
       404: components["responses"]["404"];
     };
@@ -3125,6 +7864,113 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+    };
+  };
+  "get-database-backups-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all backups for a database */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-database-backup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Backup configuration data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Backup frequency (cron expression or: every_minute, hourly, daily, weekly, monthly, yearly) */
+          frequency: string;
+          /**
+           * @description Whether the backup is enabled
+           * @default true
+           */
+          enabled?: boolean;
+          /**
+           * @description Whether to save backups to S3
+           * @default false
+           */
+          save_s3?: boolean;
+          /** @description S3 storage UUID (required if save_s3 is true) */
+          s3_storage_uuid?: string;
+          /** @description Comma separated list of databases to backup */
+          databases_to_backup?: string;
+          /**
+           * @description Whether to dump all databases
+           * @default false
+           */
+          dump_all?: boolean;
+          /** @description Whether to trigger backup immediately after creation */
+          backup_now?: boolean;
+          /** @description Number of backups to retain locally */
+          database_backup_retention_amount_locally?: number;
+          /** @description Number of days to retain backups locally */
+          database_backup_retention_days_locally?: number;
+          /** @description Max storage (GB) for local backups */
+          database_backup_retention_max_storage_locally?: number;
+          /** @description Number of backups to retain in S3 */
+          database_backup_retention_amount_s3?: number;
+          /** @description Number of days to retain backups in S3 */
+          database_backup_retention_days_s3?: number;
+          /** @description Max storage (GB) for S3 backups */
+          database_backup_retention_max_storage_s3?: number;
+          /**
+           * @description Backup job timeout in seconds (min: 60, max: 36000)
+           * @default 3600
+           */
+          timeout?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Backup configuration created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /**
+             * Format: uuid
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            uuid?: string;
+            /** @example Backup configuration created successfully. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "get-database-by-uuid": {
@@ -3215,6 +8061,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3283,6 +8131,31 @@ export interface operations {
           mysql_database?: string;
           /** @description MySQL conf */
           mysql_conf?: string;
+          /**
+           * @description Enable the database healthcheck probe.
+           * @default true
+           */
+          health_check_enabled?: boolean;
+          /**
+           * @description Healthcheck interval in seconds.
+           * @default 15
+           */
+          health_check_interval?: number;
+          /**
+           * @description Healthcheck timeout in seconds.
+           * @default 5
+           */
+          health_check_timeout?: number;
+          /**
+           * @description Healthcheck retries count.
+           * @default 5
+           */
+          health_check_retries?: number;
+          /**
+           * @description Healthcheck start period in seconds.
+           * @default 5
+           */
+          health_check_start_period?: number;
         };
       };
     };
@@ -3297,6 +8170,114 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-backup-configuration-by-uuid": {
+    parameters: {
+      query?: {
+        /** @description Whether to delete all backup files from S3 */
+        delete_s3?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the database */
+        uuid: string;
+        /** @description UUID of the backup configuration to delete */
+        scheduled_backup_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Backup configuration deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Backup configuration and all executions deleted. */
+            message?: string;
+          };
+        };
+      };
+      /** @description Backup configuration not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Backup configuration not found. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  "update-database-backup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+        /** @description UUID of the backup configuration. */
+        scheduled_backup_uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Database backup configuration data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Whether data is saved in s3 or not */
+          save_s3?: boolean;
+          /** @description S3 storage UUID */
+          s3_storage_uuid?: string;
+          /** @description Whether to take a backup now or not */
+          backup_now?: boolean;
+          /** @description Whether the backup is enabled or not */
+          enabled?: boolean;
+          /** @description Comma separated list of databases to backup */
+          databases_to_backup?: string;
+          /** @description Whether all databases are dumped or not */
+          dump_all?: boolean;
+          /** @description Frequency of the backup */
+          frequency?: string;
+          /** @description Retention amount of the backup locally */
+          database_backup_retention_amount_locally?: number;
+          /** @description Retention days of the backup locally */
+          database_backup_retention_days_locally?: number;
+          /** @description Max storage of the backup locally */
+          database_backup_retention_max_storage_locally?: number;
+          /** @description Retention amount of the backup in s3 */
+          database_backup_retention_amount_s3?: number;
+          /** @description Retention days of the backup in s3 */
+          database_backup_retention_days_s3?: number;
+          /** @description Max storage of the backup in S3 */
+          database_backup_retention_max_storage_s3?: number;
+          /**
+           * @description Backup job timeout in seconds (min: 60, max: 36000)
+           * @default 3600
+           */
+          timeout?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Database backup configuration updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-postgresql": {
@@ -3342,6 +8323,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3358,6 +8341,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3371,6 +8356,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-clickhouse": {
@@ -3408,6 +8394,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3424,6 +8412,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3437,6 +8427,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-dragonfly": {
@@ -3472,6 +8463,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3488,6 +8481,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3501,6 +8496,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-redis": {
@@ -3538,6 +8534,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3554,6 +8552,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3567,6 +8567,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-keydb": {
@@ -3604,6 +8605,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3620,6 +8623,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3633,6 +8638,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-mariadb": {
@@ -3676,6 +8682,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3692,6 +8700,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3705,6 +8715,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-mysql": {
@@ -3748,6 +8759,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3764,6 +8777,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3777,6 +8792,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "create-database-mongodb": {
@@ -3814,6 +8830,8 @@ export interface operations {
           is_public?: boolean;
           /** @description Public port of the database */
           public_port?: number;
+          /** @description Public port timeout in seconds (default: 3600) */
+          public_port_timeout?: number;
           /** @description Memory limit of the database */
           limits_memory?: string;
           /** @description Memory swap limit of the database */
@@ -3830,6 +8848,8 @@ export interface operations {
           limits_cpu_shares?: number;
           /** @description Instant deploy the database */
           instant_deploy?: boolean;
+          /** @description Tags to assign to the database. */
+          tags?: string[];
         };
       };
     };
@@ -3843,6 +8863,204 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-database-logs-by-uuid": {
+    parameters: {
+      query?: {
+        /** @description Number of lines to show from the end of the logs. */
+        lines?: number;
+        /** @description Show timestamps in the logs. */
+        show_timestamps?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get database logs by UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "delete-backup-execution-by-uuid": {
+    parameters: {
+      query?: {
+        /** @description Whether to delete the backup from S3 */
+        delete_s3?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the database */
+        uuid: string;
+        /** @description UUID of the backup configuration */
+        scheduled_backup_uuid: string;
+        /** @description UUID of the backup execution to delete */
+        execution_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Backup execution deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Backup execution deleted. */
+            message?: string;
+          };
+        };
+      };
+      /** @description Backup execution not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Backup execution not found. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  "list-backup-executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database */
+        uuid: string;
+        /** @description UUID of the backup configuration */
+        scheduled_backup_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of backup executions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            executions?: {
+              uuid?: string;
+              filename?: string;
+              size?: number;
+              created_at?: string;
+              message?: string;
+              status?: string;
+            }[];
+          };
+        };
+      };
+      /** @description Backup configuration not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "move-database-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Target environment to move the database to. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the target environment. */
+          environment_uuid: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Database moved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Database moved successfully. */
+            message?: string;
+            uuid?: string;
+            project_uuid?: string;
+            environment_uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "migrate-database-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the target destination. */
+          destination_uuid: string;
+          /**
+           * @description Whether to transfer persistent volume data when migrating across servers.
+           * @default true
+           */
+          migrate_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Database migration started or completed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "start-database-by-uuid": {
@@ -3876,7 +9094,10 @@ export interface operations {
   };
   "stop-database-by-uuid": {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Perform docker cleanup (prune networks, volumes, etc.). */
+        docker_cleanup?: boolean;
+      };
       header?: never;
       path: {
         /** @description UUID of the database. */
@@ -3932,6 +9153,480 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
+  "list-envs-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variables. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnvironmentVariable"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-env-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Env created. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The key of the environment variable. */
+          key?: string;
+          /** @description The value of the environment variable. */
+          value?: string;
+          /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
+          is_literal?: boolean;
+          /** @description The flag to indicate if the environment variable is multiline. */
+          is_multiline?: boolean;
+          /** @description The flag to indicate if the environment variable's value is shown on the UI. */
+          is_shown_once?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Environment variable created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example nc0k04gk8g0cgsk440g0koko */
+            uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "update-env-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Env updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The key of the environment variable. */
+          key: string;
+          /** @description The value of the environment variable. */
+          value: string;
+          /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
+          is_literal?: boolean;
+          /** @description The flag to indicate if the environment variable is multiline. */
+          is_multiline?: boolean;
+          /** @description The flag to indicate if the environment variable's value is shown on the UI. */
+          is_shown_once?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Environment variable updated. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnvironmentVariable"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "update-envs-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Bulk envs updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          data: {
+            /** @description The key of the environment variable. */
+            key?: string;
+            /** @description The value of the environment variable. */
+            value?: string;
+            /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
+            is_literal?: boolean;
+            /** @description The flag to indicate if the environment variable is multiline. */
+            is_multiline?: boolean;
+            /** @description The flag to indicate if the environment variable's value is shown on the UI. */
+            is_shown_once?: boolean;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Environment variables updated. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnvironmentVariable"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-env-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+        /** @description UUID of the environment variable. */
+        env_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Environment variable deleted. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "list-storages-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All storages by database UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            persistent_storages?: Record<string, never>[];
+            file_storages?: Record<string, never>[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-storage-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The type of storage.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description Volume name (persistent only, required for persistent). */
+          name?: string;
+          /** @description The container mount path. */
+          mount_path: string;
+          /** @description The host path (persistent only, optional). */
+          host_path?: string | null;
+          /** @description File content (file only, optional). */
+          content?: string | null;
+          /** @description Whether this is a directory mount (file only, default false). */
+          is_directory?: boolean;
+          /** @description Host directory path (required when is_directory is true). */
+          fs_path?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "update-storage-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Storage updated. For read-only storages (from docker-compose or services), only is_preview_suffix_enabled can be updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The UUID of the storage (preferred). */
+          uuid?: string;
+          /** @description The ID of the storage (deprecated, use uuid instead). */
+          id?: number;
+          /**
+           * @description The type of storage: persistent or file.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description Whether to add -pr-N suffix for preview deployments. */
+          is_preview_suffix_enabled?: boolean;
+          /** @description The volume name (persistent only, not allowed for read-only storages). */
+          name?: string;
+          /** @description The container mount path (not allowed for read-only storages). */
+          mount_path?: string;
+          /** @description The host path (persistent only, not allowed for read-only storages). */
+          host_path?: string | null;
+          /** @description The file content (file only, not allowed for read-only storages). */
+          content?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-storage-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+        /** @description UUID of the storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-tags-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of tags. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-tag-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The tag name (min 2 characters). Required if tag_names is not provided. */
+          tag_name?: string;
+          /** @description Array of tag names (each min 2 characters). Required if tag_name is not provided. */
+          tag_names?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Tags added successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-tag-by-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+        /** @description UUID of the tag. */
+        tag_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag removed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "clone-database-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          destination_uuid: string;
+          name?: string | null;
+          /** @default false */
+          clone_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Database cloned. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
   "list-deployments": {
     parameters: {
       query?: never;
@@ -3980,6 +9675,62 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
+  "cancel-deployment-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Deployment UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deployment cancelled successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Deployment cancelled successfully. */
+            message?: string;
+            /** @example cm37r6cqj000008jm0veg5tkm */
+            deployment_uuid?: string;
+            /** @example cancelled-by-user */
+            status?: string;
+          };
+        };
+      };
+      /** @description Deployment cannot be cancelled (already finished/failed/cancelled). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Deployment cannot be cancelled. Current status: finished */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      /** @description User doesn't have permission to cancel this deployment. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example You do not have permission to cancel this deployment. */
+            message?: string;
+          };
+        };
+      };
+      404: components["responses"]["404"];
+    };
+  };
   "deploy-by-tag-or-uuid": {
     parameters: {
       query?: {
@@ -3989,6 +9740,12 @@ export interface operations {
         uuid?: string;
         /** @description Force rebuild (without cache) */
         force?: boolean;
+        /** @description Pull Request Id for deploying specific PR builds. Cannot be used with tag parameter. */
+        pr?: number;
+        /** @description Preview deployment identifier. Alias of pr. */
+        pull_request_id?: number;
+        /** @description Docker image tag for Docker Image preview deployments. Requires pull_request_id. */
+        docker_tag?: string;
       };
       header?: never;
       path?: never;
@@ -4015,6 +9772,1506 @@ export interface operations {
       401: components["responses"]["401"];
     };
   };
+  "list-deployments-by-app-uuid": {
+    parameters: {
+      query?: {
+        /** @description Number of records to skip. */
+        skip?: number;
+        /** @description Number of records to take. */
+        take?: number;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List application deployments by using the app uuid. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Application"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "list-destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Destinations for the authenticated team. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Destination"][];
+        };
+      };
+      401: components["responses"]["401"];
+    };
+  };
+  "list-server-destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        server_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Destinations attached to the server. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Destination"][];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-server-destination": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        server_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          network: string;
+          /** @enum {string} */
+          type?: "standalone" | "swarm";
+        };
+      };
+    };
+    responses: {
+      /** @description Destination created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Destination"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description A destination with this network already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-destination-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Destination UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Destination details. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Destination"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "delete-destination-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Destination UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Destination deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Deleted. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Destination has attached resources. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "update-destination-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Destination UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Destination updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Destination"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-digitalocean-regions": {
+    parameters: {
+      query?: {
+        cloud_provider_token_uuid?: string;
+        /** @deprecated */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of DigitalOcean regions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "get-digitalocean-sizes": {
+    parameters: {
+      query?: {
+        cloud_provider_token_uuid?: string;
+        /** @deprecated */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of DigitalOcean sizes. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "get-digitalocean-images": {
+    parameters: {
+      query?: {
+        cloud_provider_token_uuid?: string;
+        /** @deprecated */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of DigitalOcean images. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "get-digitalocean-ssh-keys": {
+    parameters: {
+      query?: {
+        cloud_provider_token_uuid?: string;
+        /** @deprecated */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of DigitalOcean SSH keys. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "create-digitalocean-server": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description DigitalOcean droplet created and linked to a Coolify server. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description DigitalOcean rate limit exceeded. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "list-github-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of GitHub apps. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            uuid?: string;
+            name?: string;
+            organization?: string | null;
+            api_url?: string;
+            html_url?: string;
+            custom_user?: string;
+            custom_port?: number;
+            app_id?: number;
+            installation_id?: number;
+            client_id?: string;
+            private_key_id?: number;
+            is_system_wide?: boolean;
+            is_public?: boolean;
+            team_id?: number;
+            type?: string;
+          }[];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "create-github-app": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description GitHub app creation payload. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Name of the GitHub app. */
+          name: string;
+          /** @description Organization to associate the app with. */
+          organization?: string | null;
+          /** @description API URL for the GitHub app (e.g., https://api.github.com). */
+          api_url?: string;
+          /** @description HTML URL for the GitHub app (e.g., https://github.com). */
+          html_url: string;
+          /** @description Custom user for SSH access (default: git). */
+          custom_user?: string;
+          /** @description Custom port for SSH access (default: 22). */
+          custom_port?: number;
+          /** @description GitHub App ID from GitHub. */
+          app_id: number;
+          /** @description GitHub Installation ID. */
+          installation_id: number;
+          /** @description GitHub OAuth App Client ID. */
+          client_id: string;
+          /** @description GitHub OAuth App Client Secret. */
+          client_secret: string;
+          /** @description Webhook secret for GitHub webhooks. */
+          webhook_secret?: string;
+          /** @description UUID of an existing private key for GitHub App authentication. */
+          private_key_uuid: string;
+          /** @description Is this app system-wide (cloud only). */
+          is_system_wide?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description GitHub app created successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            uuid?: string;
+            name?: string;
+            organization?: string | null;
+            api_url?: string;
+            html_url?: string;
+            custom_user?: string;
+            custom_port?: number;
+            app_id?: number;
+            installation_id?: number;
+            client_id?: string;
+            private_key_id?: number;
+            is_system_wide?: boolean;
+            team_id?: number;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      422: components["responses"]["422"];
+    };
+  };
+  "load-repositories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitHub App ID */
+        github_app_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Repositories loaded successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            repositories?: Record<string, never>[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "load-branches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitHub App ID */
+        github_app_id: number;
+        /** @description Repository owner */
+        owner: string;
+        /** @description Repository name */
+        repo: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Branches loaded successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            branches?: Record<string, never>[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  deleteGithubApp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitHub App ID */
+        github_app_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description GitHub app deleted successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example GitHub app deleted successfully */
+            message?: string;
+          };
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description GitHub app not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Conflict - GitHub app is in use */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example This GitHub app is being used by 5 application(s). Please delete all applications first. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  updateGithubApp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitHub App ID */
+        github_app_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description GitHub App name */
+          name?: string;
+          /** @description GitHub organization */
+          organization?: string | null;
+          /** @description GitHub API URL */
+          api_url?: string;
+          /** @description GitHub HTML URL */
+          html_url?: string;
+          /** @description Custom user for SSH */
+          custom_user?: string;
+          /** @description Custom port for SSH */
+          custom_port?: number;
+          /** @description GitHub App ID */
+          app_id?: number;
+          /** @description GitHub Installation ID */
+          installation_id?: number;
+          /** @description GitHub Client ID */
+          client_id?: string;
+          /** @description GitHub Client Secret */
+          client_secret?: string;
+          /** @description GitHub Webhook Secret */
+          webhook_secret?: string;
+          /** @description Private key UUID */
+          private_key_uuid?: string;
+          /** @description Is system wide (non-cloud instances only) */
+          is_system_wide?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description GitHub app updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example GitHub app updated successfully */
+            message?: string;
+            /** @description Updated GitHub app data */
+            data?: Record<string, never>;
+          };
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description GitHub app not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "list-gitlab-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of GitLab apps. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            uuid?: string;
+            name?: string;
+            api_url?: string;
+            html_url?: string;
+            custom_user?: string;
+            custom_port?: number;
+            client_id?: string | null;
+            group_name?: string | null;
+            redirect_uri?: string | null;
+            is_system_wide?: boolean;
+            is_public?: boolean;
+            team_id?: number;
+          }[];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "create-gitlab-app": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description GitLab app creation payload. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Name of the GitLab app. */
+          name: string;
+          /** @description GitLab instance URL (e.g., https://gitlab.com). */
+          html_url: string;
+          /** @description GitLab API URL (defaults to {html_url}/api/v4). */
+          api_url?: string;
+          /** @description Custom user for SSH access (default: git). */
+          custom_user?: string;
+          /** @description Custom port for SSH access (default: 22). */
+          custom_port?: number;
+          /** @description Optional comma-separated group names to filter repositories. */
+          group_name?: string | null;
+          /** @description GitLab OAuth Application ID. */
+          client_id?: string | null;
+          /** @description GitLab OAuth Application Secret. */
+          client_secret?: string | null;
+          /** @description Webhook secret token (auto-generated when omitted). */
+          webhook_token?: string | null;
+          /** @description OAuth redirect URI registered in GitLab. */
+          redirect_uri?: string | null;
+          /** @description Is this app system-wide (non-cloud instances only). */
+          is_system_wide?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description GitLab app created successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            uuid?: string;
+            name?: string;
+            api_url?: string;
+            html_url?: string;
+            custom_user?: string;
+            custom_port?: number;
+            client_id?: string | null;
+            group_name?: string | null;
+            redirect_uri?: string | null;
+            is_system_wide?: boolean;
+            team_id?: number;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      422: components["responses"]["422"];
+    };
+  };
+  deleteGitlabApp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitLab App ID */
+        gitlab_app_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description GitLab app deleted successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example GitLab app deleted successfully */
+            message?: string;
+          };
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description GitLab app not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Conflict - GitLab app is in use */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example This GitLab app is being used by 5 application(s). Please delete all applications first. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  updateGitlabApp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description GitLab App ID */
+        gitlab_app_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description GitLab App name */
+          name?: string;
+          /** @description GitLab HTML URL */
+          html_url?: string;
+          /** @description GitLab API URL */
+          api_url?: string;
+          /** @description Custom user for SSH */
+          custom_user?: string;
+          /** @description Custom port for SSH */
+          custom_port?: number;
+          /** @description Optional group filter */
+          group_name?: string | null;
+          /** @description OAuth Application ID */
+          client_id?: string | null;
+          /** @description OAuth Application Secret */
+          client_secret?: string | null;
+          /** @description Webhook secret token */
+          webhook_token?: string | null;
+          /** @description OAuth redirect URI */
+          redirect_uri?: string | null;
+          /** @description Is system wide (non-cloud instances only) */
+          is_system_wide?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description GitLab app updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example GitLab app updated successfully */
+            message?: string;
+            /** @description Updated GitLab app data */
+            data?: Record<string, never>;
+          };
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description GitLab app not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-hetzner-locations": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner locations. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+            description?: string;
+            country?: string;
+            city?: string;
+            latitude?: number;
+            longitude?: number;
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-hetzner-server-types": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner server types. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+            description?: string;
+            cores?: number;
+            memory?: number;
+            disk?: number;
+            prices?: {
+              /** @description Datacenter location name */
+              location?: string;
+              price_hourly?: {
+                net?: string;
+                gross?: string;
+              };
+              price_monthly?: {
+                net?: string;
+                gross?: string;
+              };
+            }[];
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-hetzner-images": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner images. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+            description?: string;
+            type?: string;
+            os_flavor?: string;
+            os_version?: string;
+            architecture?: string;
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-hetzner-ssh-keys": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner SSH keys. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+            fingerprint?: string;
+            public_key?: string;
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-hetzner-firewalls": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner firewalls. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-hetzner-networks": {
+    parameters: {
+      query?: {
+        /** @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided. */
+        cloud_provider_token_uuid?: string;
+        /**
+         * @deprecated
+         * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+         */
+        cloud_provider_token_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Hetzner networks. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            id?: number;
+            name?: string;
+            ip_range?: string;
+          }[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-hetzner-server": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Hetzner server creation parameters */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Cloud provider token UUID. Required if cloud_provider_token_id is not provided.
+           * @example abc123
+           */
+          cloud_provider_token_uuid?: string;
+          /**
+           * @deprecated
+           * @description Deprecated: Use cloud_provider_token_uuid instead. Cloud provider token UUID.
+           * @example abc123
+           */
+          cloud_provider_token_id?: string;
+          /**
+           * @description Hetzner location name
+           * @example nbg1
+           */
+          location: string;
+          /**
+           * @description Hetzner server type name
+           * @example cx11
+           */
+          server_type: string;
+          /**
+           * @description Hetzner image ID
+           * @example 15512617
+           */
+          image: number;
+          /**
+           * @description Server name (auto-generated if not provided)
+           * @example my-server
+           */
+          name?: string;
+          /**
+           * @description Private key UUID
+           * @example xyz789
+           */
+          private_key_uuid: string;
+          /**
+           * @description Enable IPv4 (default: true)
+           * @example true
+           */
+          enable_ipv4?: boolean;
+          /**
+           * @description Enable IPv6 (default: true)
+           * @example true
+           */
+          enable_ipv6?: boolean;
+          /**
+           * @description Enable Hetzner server backups after creation (adds 20% to the monthly server fee)
+           * @example false
+           */
+          enable_backups?: boolean;
+          /** @description Additional Hetzner SSH key IDs */
+          hetzner_ssh_key_ids?: number[];
+          /** @description Existing Hetzner firewall IDs to apply during server creation */
+          hetzner_firewall_ids?: number[];
+          /** @description Existing Hetzner network IDs to attach during server creation */
+          hetzner_network_ids?: number[];
+          /** @description Cloud-init YAML script (optional) */
+          cloud_init_script?: string;
+          /**
+           * @description Validate server immediately after creation
+           * @example false
+           */
+          instant_validate?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Hetzner server created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /**
+             * @description The UUID of the server.
+             * @example og888os
+             */
+            uuid?: string;
+            /** @description The Hetzner server ID. */
+            hetzner_server_id?: number;
+            /** @description The server IP address. */
+            ip?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+      429: components["responses"]["429"];
+    };
+  };
+  "get-current-team-email-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Email notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-email-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated email notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-current-team-discord-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Discord notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-discord-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated Discord notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-current-team-slack-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Slack notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-slack-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated Slack notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-current-team-telegram-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Telegram notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-telegram-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated Telegram notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-current-team-pushover-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Pushover notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-pushover-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated Pushover notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-current-team-webhook-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Webhook notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "update-current-team-webhook-notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Updated webhook notification settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
   version: {
     parameters: {
       query?: never;
@@ -4030,7 +11287,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": string;
+          "text/html": string;
         };
       };
       400: components["responses"]["400"];
@@ -4111,6 +11368,80 @@ export interface operations {
       };
     };
   };
+  "enable-mcp": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description MCP server enabled. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example MCP server enabled. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description You are not allowed to enable the MCP server. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example You are not allowed to enable the MCP server. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  "disable-mcp": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description MCP server disabled. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example MCP server disabled. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description You are not allowed to disable the MCP server. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example You are not allowed to disable the MCP server. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
   healthcheck: {
     parameters: {
       query?: never;
@@ -4126,7 +11457,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": string;
+          "text/html": string;
         };
       };
       400: components["responses"]["400"];
@@ -4192,6 +11523,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "get-project-by-uuid": {
@@ -4253,13 +11585,17 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "update-project-by-uuid": {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        /** @description UUID of the project. */
+        uuid: string;
+      };
       cookie?: never;
     };
     /** @description Project updated. */
@@ -4293,6 +11629,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "get-environment-by-name-or-uuid": {
@@ -4321,6 +11658,197 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-environments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of environments */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Environment"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Project not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "create-environment": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Environment created. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the environment. */
+          name?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Environment created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /**
+             * @description The UUID of the environment.
+             * @example env123
+             */
+            uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Project not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Environment with this name already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-environment": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Environment deleted. */
+            message?: string;
+          };
+        };
+      };
+      /** @description Environment has resources, so it cannot be deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Project or environment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "update-environment": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Environment fields to update. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the environment. */
+          name?: string;
+          /** @description The description of the environment. */
+          description?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Environment updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example env123 */
+            uuid?: string;
+            /** @example staging */
+            name?: string;
+            /** @example Staging environment */
+            description?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Project or environment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Environment with this name already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
     };
   };
   "list-resources": {
@@ -4343,6 +11871,664 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+    };
+  };
+  "list-s3-storages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all S3 storages. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            name?: string;
+            description?: string | null;
+            endpoint?: string;
+            bucket?: string;
+            region?: string;
+            is_usable?: boolean;
+            team_id?: number;
+            created_at?: string;
+            updated_at?: string;
+          }[];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "create-s3-storage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description S3 storage details */
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description A friendly name for the storage.
+           * @example My S3 Storage
+           */
+          name: string;
+          /** @description Optional description. */
+          description?: string | null;
+          /**
+           * @description S3-compatible endpoint URL.
+           * @example https://s3.us-east-1.amazonaws.com
+           */
+          endpoint: string;
+          /**
+           * @description S3 bucket name.
+           * @example my-bucket
+           */
+          bucket: string;
+          /**
+           * @description S3 region.
+           * @example us-east-1
+           */
+          region: string;
+          /** @description Access key. */
+          key: string;
+          /** @description Secret key. */
+          secret: string;
+          /** @description Whether the storage is marked usable. */
+          is_usable?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description S3 storage created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /**
+             * @description The UUID of the S3 storage.
+             * @example og888os
+             */
+            uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-s3-storage-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description S3 Storage UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get S3 storage by UUID */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            name?: string;
+            description?: string | null;
+            endpoint?: string;
+            bucket?: string;
+            region?: string;
+            is_usable?: boolean;
+            team_id?: number;
+            created_at?: string;
+            updated_at?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "delete-s3-storage-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the S3 storage. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description S3 storage deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example S3 storage deleted. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-s3-storage-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description S3 Storage UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description S3 storage fields to update. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description A friendly name for the storage. */
+          name?: string;
+          /** @description Optional description. */
+          description?: string | null;
+          /** @description S3-compatible endpoint URL. */
+          endpoint?: string;
+          /** @description S3 bucket name. */
+          bucket?: string;
+          /** @description S3 region. */
+          region?: string;
+          /** @description Access key. */
+          key?: string;
+          /** @description Secret key. */
+          secret?: string;
+          /** @description Whether the storage is marked usable. */
+          is_usable?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description S3 storage updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "validate-s3-storage-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description S3 Storage UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description S3 storage validation result. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example true */
+            valid?: boolean;
+            /** @example S3 storage connection is valid. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "list-scheduled-tasks-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all scheduled tasks for an application. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"][];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-scheduled-task-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Scheduled task data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the scheduled task. */
+          name: string;
+          /** @description The command to execute. */
+          command: string;
+          /** @description The frequency of the scheduled task. */
+          frequency: string;
+          /** @description The container where the command should be executed. */
+          container?: string | null;
+          /**
+           * @description The timeout of the scheduled task in seconds.
+           * @default 300
+           */
+          timeout?: number;
+          /**
+           * @description The flag to indicate if the scheduled task is enabled.
+           * @default true
+           */
+          enabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Scheduled task created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-scheduled-task-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Scheduled task deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Scheduled task deleted. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-scheduled-task-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Scheduled task data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the scheduled task. */
+          name?: string;
+          /** @description The command to execute. */
+          command?: string;
+          /** @description The frequency of the scheduled task. */
+          frequency?: string;
+          /** @description The container where the command should be executed. */
+          container?: string | null;
+          /**
+           * @description The timeout of the scheduled task in seconds.
+           * @default 300
+           */
+          timeout?: number;
+          /**
+           * @description The flag to indicate if the scheduled task is enabled.
+           * @default true
+           */
+          enabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Scheduled task updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-scheduled-task-executions-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all executions for a scheduled task. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTaskExecution"][];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "list-scheduled-tasks-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all scheduled tasks for a service. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"][];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-scheduled-task-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Scheduled task data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the scheduled task. */
+          name: string;
+          /** @description The command to execute. */
+          command: string;
+          /** @description The frequency of the scheduled task. */
+          frequency: string;
+          /** @description The container where the command should be executed. */
+          container?: string | null;
+          /**
+           * @description The timeout of the scheduled task in seconds.
+           * @default 300
+           */
+          timeout?: number;
+          /**
+           * @description The flag to indicate if the scheduled task is enabled.
+           * @default true
+           */
+          enabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Scheduled task created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-scheduled-task-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Scheduled task deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Scheduled task deleted. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-scheduled-task-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Scheduled task data */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The name of the scheduled task. */
+          name?: string;
+          /** @description The command to execute. */
+          command?: string;
+          /** @description The frequency of the scheduled task. */
+          frequency?: string;
+          /** @description The container where the command should be executed. */
+          container?: string | null;
+          /**
+           * @description The timeout of the scheduled task in seconds.
+           * @default 300
+           */
+          timeout?: number;
+          /**
+           * @description The flag to indicate if the scheduled task is enabled.
+           * @default true
+           */
+          enabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Scheduled task updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTask"];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-scheduled-task-executions-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all executions for a scheduled task. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledTaskExecution"][];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "execute-scheduled-task-by-application-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Scheduled task execution queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "execute-scheduled-task-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the scheduled task. */
+        task_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Scheduled task execution queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
     };
   };
   "list-private-keys": {
@@ -4397,6 +12583,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "update-private-key": {
@@ -4429,6 +12616,7 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      422: components["responses"]["422"];
     };
   };
   "get-private-key-by-uuid": {
@@ -4496,6 +12684,835 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Private Key is in use and cannot be deleted. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Private Key is in use and cannot be deleted. */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  "get-server-cloudflare-tunnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloudflare Tunnel settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            is_cloudflare_tunnel?: boolean;
+            ip?: string;
+            ip_previous?: string | null;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-cloudflare-tunnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          is_cloudflare_tunnel?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated Cloudflare Tunnel settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "enable-server-cloudflare-tunnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloudflare Tunnel enabled. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "disable-server-cloudflare-tunnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cloudflare Tunnel disabled. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-server-docker-cleanup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Docker cleanup settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            docker_cleanup_frequency?: string;
+            docker_cleanup_threshold?: number;
+            force_docker_cleanup?: boolean;
+            delete_unused_volumes?: boolean;
+            delete_unused_networks?: boolean;
+            disable_application_image_retention?: boolean;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-docker-cleanup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Cron / human frequency expression. */
+          docker_cleanup_frequency?: string;
+          docker_cleanup_threshold?: number;
+          force_docker_cleanup?: boolean;
+          delete_unused_volumes?: boolean;
+          delete_unused_networks?: boolean;
+          disable_application_image_retention?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated Docker cleanup settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            docker_cleanup_frequency?: string;
+            docker_cleanup_threshold?: number;
+            force_docker_cleanup?: boolean;
+            delete_unused_volumes?: boolean;
+            delete_unused_networks?: boolean;
+            disable_application_image_retention?: boolean;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "run-server-docker-cleanup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          delete_unused_volumes?: boolean;
+          delete_unused_networks?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Docker cleanup job dispatched. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Manual cleanup job started. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-server-docker-cleanup-executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Recent Docker cleanup executions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            uuid?: string;
+            status?: string;
+            message?: string | null;
+            finished_at?: string | null;
+            created_at?: string;
+            updated_at?: string;
+          }[];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-server-log-drains": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Log drain settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            is_logdrain_newrelic_enabled?: boolean;
+            /** @description Only present with read:sensitive. */
+            logdrain_newrelic_license_key?: string;
+            logdrain_newrelic_base_uri?: string | null;
+            is_logdrain_axiom_enabled?: boolean;
+            logdrain_axiom_dataset_name?: string | null;
+            /** @description Only present with read:sensitive. */
+            logdrain_axiom_api_key?: string;
+            is_logdrain_custom_enabled?: boolean;
+            /** @description Only present with read:sensitive. */
+            logdrain_custom_config?: string;
+            /** @description Only present with read:sensitive. */
+            logdrain_custom_config_parser?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-log-drains": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          is_logdrain_newrelic_enabled?: boolean;
+          logdrain_newrelic_license_key?: string;
+          logdrain_newrelic_base_uri?: string;
+          is_logdrain_axiom_enabled?: boolean;
+          logdrain_axiom_dataset_name?: string;
+          logdrain_axiom_api_key?: string;
+          is_logdrain_custom_enabled?: boolean;
+          logdrain_custom_config?: string;
+          logdrain_custom_config_parser?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated log drain settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-server-proxy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Server proxy settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example TRAEFIK */
+            proxy_type?: string | null;
+            /** @example running */
+            status?: string | null;
+            /** @example true */
+            redirect_enabled?: boolean;
+            /** @example https://example.com */
+            redirect_url?: string | null;
+            /** @example false */
+            generate_exact_labels?: boolean;
+            /** @description Docker Compose proxy configuration when stored in the database. Only present with read:sensitive. */
+            configuration?: string | null;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-proxy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          redirect_enabled?: boolean;
+          /** @description Public http(s) redirect URL, or null to clear. */
+          redirect_url?: string | null;
+          generate_exact_labels?: boolean;
+          /**
+           * @description Proxy type (case-insensitive).
+           * @enum {string}
+           */
+          proxy_type?: "traefik" | "caddy" | "nginx" | "none";
+        };
+      };
+    };
+    responses: {
+      /** @description Proxy settings updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            proxy_type?: string | null;
+            status?: string | null;
+            redirect_enabled?: boolean;
+            redirect_url?: string | null;
+            generate_exact_labels?: boolean;
+            configuration?: string | null;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "save-server-proxy-configuration": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Proxy docker-compose YAML. Prefer base64 encoding for multi-line content. */
+          configuration: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Proxy configuration saved. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Proxy configuration saved. */
+            message?: string;
+            proxy_type?: string | null;
+            status?: string | null;
+            redirect_enabled?: boolean;
+            redirect_url?: string | null;
+            generate_exact_labels?: boolean;
+            configuration?: string | null;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "restart-server-proxy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Proxy restart queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Proxy restart queued. */
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-server-sentinel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Sentinel settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            is_sentinel_enabled?: boolean;
+            is_metrics_enabled?: boolean;
+            is_sentinel_debug_enabled?: boolean;
+            /** @description Only present with read:sensitive. */
+            sentinel_token?: string;
+            sentinel_metrics_refresh_rate_seconds?: number;
+            sentinel_metrics_history_days?: number;
+            sentinel_push_interval_seconds?: number;
+            /** @description Only present with read:sensitive. */
+            sentinel_custom_url?: string;
+            sentinel_updated_at?: string | null;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-sentinel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          is_sentinel_enabled?: boolean;
+          is_metrics_enabled?: boolean;
+          is_sentinel_debug_enabled?: boolean;
+          sentinel_token?: string;
+          sentinel_metrics_refresh_rate_seconds?: number;
+          sentinel_metrics_history_days?: number;
+          sentinel_push_interval_seconds?: number;
+          sentinel_custom_url?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated Sentinel settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "migrate-server-between-instances": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @example https://coolify-b.example.com */
+          target_url: string;
+          /** @description API token on the target instance (root or write) */
+          target_token: string;
+          /** @default false */
+          write_remote?: boolean;
+          /** @default true */
+          rebind_sentinel?: boolean;
+          /** @default true */
+          preserve_uuids?: boolean;
+          /** @default true */
+          adopt_mode?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Migrated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing sensitive permission */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      /** @description Validation or remote import failed */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "export-server-transfer-bundle": {
+    parameters: {
+      query?: {
+        /** @description If true and passphrase is provided, return an encrypted envelope. */
+        encrypt?: boolean;
+        /** @description Passphrase used when encrypt=true. */
+        passphrase?: string;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Transfer bundle */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Missing sensitive permission */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+    };
+  };
+  "import-server-transfer-bundle": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Plain or encrypted transfer bundle */
+          bundle?: Record<string, never>;
+          passphrase?: string | null;
+          /** @default false */
+          dry_run?: boolean;
+          /** @default true */
+          preserve_uuids?: boolean;
+          /**
+           * @description Import without forcing redeploy; keep statuses for adoption
+           * @default true
+           */
+          adopt_mode?: boolean;
+          /**
+           * @description Automatically claim the host for this instance after import
+           * @default true
+           */
+          claim?: boolean;
+          /**
+           * @description When claiming, write ownership file on the host via SSH
+           * @default false
+           */
+          write_remote?: boolean;
+          /**
+           * @description When claiming, rebind Sentinel to this instance
+           * @default true
+           */
+          rebind_sentinel?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Dry-run result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Imported */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "claim-server": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @default true */
+          write_remote?: boolean;
+          /** @default true */
+          rebind_sentinel?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Claim result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+    };
+  };
+  "complete-server-transfer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          export_id?: string | null;
+          target_instance_url?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Marked transferred */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+    };
+  };
+  "export-server-transfer-mailbox": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          passphrase?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Mailbox write result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing sensitive permission */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
     };
   };
   "list-servers": {
@@ -4599,6 +13616,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "get-server-by-uuid": {
@@ -4654,6 +13672,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "update-server-by-uuid": {
@@ -4691,6 +13710,18 @@ export interface operations {
            * @enum {string}
            */
           proxy_type?: "traefik" | "caddy" | "none";
+          /** @description Number of concurrent builds. */
+          concurrent_builds?: number;
+          /** @description Deployment timeout in seconds. */
+          dynamic_timeout?: number;
+          /** @description Maximum number of queued deployments. */
+          deployment_queue_limit?: number;
+          /** @description Server disk usage notification threshold (%). */
+          server_disk_usage_notification_threshold?: number;
+          /** @description Cron expression for disk usage check frequency. */
+          server_disk_usage_check_frequency?: string;
+          /** @description SSH connection timeout in seconds (1-300). Default: 10. */
+          connection_timeout?: number;
         };
       };
     };
@@ -4707,6 +13738,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "get-resources-by-server-uuid": {
@@ -4780,7 +13812,17 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": {
+          /**
+           * @description Install missing prerequisites and Docker. This can restart the Docker daemon.
+           * @default false
+           */
+          install?: boolean;
+        };
+      };
+    };
     responses: {
       /** @description Server validation started. */
       201: {
@@ -4797,6 +13839,537 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-service-applications-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Service applications for this service. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-service-application-by-service-and-app-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+        /** @description Service application UUID. */
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Service application. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "patch-service-application-by-service-and-app-uuid": {
+    parameters: {
+      query?: {
+        /** @description When true, allow duplicate URLs in the request and proceed despite domain conflicts (same as service PATCH). */
+        force_domain_override?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+        /** @description Service application UUID. */
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @description Comma-separated list of URLs (e.g. "http://app.example.com:8080,https://app2.example.com"). Stored as fqdn. */
+          url?: string | null;
+          /** @description The subset of the service application domains served with an X-Robots-Tag: noindex, nofollow response header, keeping them out of search engines. Entries that are not among the domains are ignored. */
+          noindex_domains?: string[] | null;
+          human_name?: string | null;
+          description?: string | null;
+          image?: string | null;
+          exclude_from_status?: boolean | null;
+          is_log_drain_enabled?: boolean | null;
+          is_gzip_enabled?: boolean | null;
+          is_stripprefix_enabled?: boolean | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated service application. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Domain conflicts (unless force_domain_override). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-service-application-logs-by-service-and-app-uuid": {
+    parameters: {
+      query?: {
+        /** @description Number of lines to show from the end of the logs. */
+        lines?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+        /** @description Service application UUID. */
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Logs. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "post-service-application-logs-by-service-and-app-uuid": {
+    parameters: {
+      query?: {
+        lines?: number;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Logs. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "post-start-service-application-by-service-and-app-uuid": {
+    parameters: {
+      query?: {
+        force?: boolean;
+        latest?: boolean;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deploy request queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "post-restart-service-application-by-service-and-app-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Restart queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "post-stop-service-application-by-service-and-app-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        app_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stop queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "list-service-databases-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Service databases. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>[];
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-service-database-by-service-and-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+        /** @description Service database UUID. */
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Service database. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "patch-service-database-by-service-and-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Service UUID. */
+        uuid: string;
+        /** @description Service database UUID. */
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          human_name?: string | null;
+          description?: string | null;
+          image?: string;
+          exclude_from_status?: boolean;
+          is_log_drain_enabled?: boolean;
+          is_public?: boolean;
+          public_port?: number | null;
+          public_port_timeout?: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated service database. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "get-service-database-logs-by-service-and-database-uuid": {
+    parameters: {
+      query?: {
+        lines?: number;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Logs. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "start-service-database-by-service-and-database-uuid": {
+    parameters: {
+      query?: {
+        force?: boolean;
+        latest?: boolean;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deploy request queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "restart-service-database-by-service-and-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Restart queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "stop-service-database-by-service-and-database-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        database_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stop queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Swarm not supported. */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   "list-services": {
@@ -4831,97 +14404,8 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          /**
-           * @description The one-click service type
-           * @enum {string}
-           */
-          type:
-            | "activepieces"
-            | "appsmith"
-            | "appwrite"
-            | "authentik"
-            | "babybuddy"
-            | "budge"
-            | "changedetection"
-            | "chatwoot"
-            | "classicpress-with-mariadb"
-            | "classicpress-with-mysql"
-            | "classicpress-without-database"
-            | "cloudflared"
-            | "code-server"
-            | "dashboard"
-            | "directus"
-            | "directus-with-postgresql"
-            | "docker-registry"
-            | "docuseal"
-            | "docuseal-with-postgres"
-            | "dokuwiki"
-            | "duplicati"
-            | "emby"
-            | "embystat"
-            | "fider"
-            | "filebrowser"
-            | "firefly"
-            | "formbricks"
-            | "ghost"
-            | "gitea"
-            | "gitea-with-mariadb"
-            | "gitea-with-mysql"
-            | "gitea-with-postgresql"
-            | "glance"
-            | "glances"
-            | "glitchtip"
-            | "grafana"
-            | "grafana-with-postgresql"
-            | "grocy"
-            | "heimdall"
-            | "homepage"
-            | "jellyfin"
-            | "kuzzle"
-            | "listmonk"
-            | "logto"
-            | "mediawiki"
-            | "meilisearch"
-            | "metabase"
-            | "metube"
-            | "minio"
-            | "moodle"
-            | "n8n"
-            | "n8n-with-postgresql"
-            | "next-image-transformation"
-            | "nextcloud"
-            | "nocodb"
-            | "odoo"
-            | "openblocks"
-            | "pairdrop"
-            | "penpot"
-            | "phpmyadmin"
-            | "pocketbase"
-            | "posthog"
-            | "reactive-resume"
-            | "rocketchat"
-            | "shlink"
-            | "slash"
-            | "snapdrop"
-            | "statusnook"
-            | "stirling-pdf"
-            | "supabase"
-            | "syncthing"
-            | "tolgee"
-            | "trigger"
-            | "trigger-with-external-database"
-            | "twenty"
-            | "umami"
-            | "unleash-with-postgresql"
-            | "unleash-without-database"
-            | "uptime-kuma"
-            | "vaultwarden"
-            | "vikunja"
-            | "weblate"
-            | "whoogle"
-            | "wordpress-with-mariadb"
-            | "wordpress-with-mysql"
-            | "wordpress-without-database";
+          /** @description The one-click service type (e.g. "actualbudget", "calibre-web", "gitea-with-mysql" ...) */
+          type?: string;
           /** @description Name of the service. */
           name?: string;
           /** @description Description of the service. */
@@ -4941,11 +14425,32 @@ export interface operations {
            * @default false
            */
           instant_deploy?: boolean;
+          /** @description The base64 encoded Docker Compose content. */
+          docker_compose_raw?: string;
+          /** @description Array of URLs to be applied to containers of a service. */
+          urls?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io"). */
+            url?: string;
+          }[];
+          /**
+           * @description Force domain override even if conflicts are detected.
+           * @default false
+           */
+          force_domain_override?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+          /** @description Tags to assign to the service. */
+          tags?: string[];
         };
       };
     };
     responses: {
-      /** @description Create a service. */
+      /** @description Service created successfully. */
       201: {
         headers: {
           [name: string]: unknown;
@@ -4961,6 +14466,36 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
+      422: components["responses"]["422"];
     };
   };
   "get-service-by-uuid": {
@@ -5027,6 +14562,138 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
+  "update-service-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Service updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The service name. */
+          name?: string;
+          /** @description The service description. */
+          description?: string;
+          /** @description The flag to indicate if the service should be deployed instantly. */
+          instant_deploy?: boolean;
+          /**
+           * @description Connect the service to the predefined docker network.
+           * @default false
+           */
+          connect_to_docker_network?: boolean;
+          /** @description The base64 encoded Docker Compose content. */
+          docker_compose_raw?: string;
+          /** @description Array of URLs to be applied to containers of a service. */
+          urls?: {
+            /** @description The service name as defined in docker-compose. */
+            name?: string;
+            /** @description Comma-separated list of URLs (e.g. "https://app.coolify.io,https://app2.coolify.io"). */
+            url?: string;
+          }[];
+          /**
+           * @description Force domain override even if conflicts are detected.
+           * @default false
+           */
+          force_domain_override?: boolean;
+          /**
+           * @description Escape special characters in labels. By default, $ (and other chars) is escaped. If you want to use env variables inside the labels, turn this off.
+           * @default true
+           */
+          is_container_label_escape_enabled?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Service updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @description Service UUID. */
+            uuid?: string;
+            /** @description Service domains. */
+            domains?: string[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Domain conflicts detected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Domain conflicts detected. Use force_domain_override=true to proceed. */
+            message?: string;
+            /** @example Using the same domain for multiple resources can cause routing conflicts and unpredictable behavior. */
+            warning?: string;
+            conflicts?: {
+              /** @example example.com */
+              domain?: string;
+              /** @example My Application */
+              resource_name?: string;
+              /** @example abc123-def456 */
+              resource_uuid?: string | null;
+              /**
+               * @example application
+               * @enum {string}
+               */
+              resource_type?: "application" | "service" | "instance";
+              /** @example Domain example.com is already in use by application 'My Application' */
+              message?: string;
+            }[];
+          };
+        };
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "get-service-logs-by-uuid": {
+    parameters: {
+      query: {
+        /** @description Sub-service name from `GET /services/{uuid}` under `applications[].name` or `databases[].name`. Do not use `human_name` or the Docker container name with the service UUID suffix. */
+        sub_service_name: string;
+        /** @description Number of lines to show from the end of the logs. */
+        lines?: number;
+        /** @description Show timestamps in the logs. */
+        show_timestamps?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get service logs by UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            logs?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
   "list-envs-by-service-uuid": {
     parameters: {
       query?: never;
@@ -5073,8 +14740,6 @@ export interface operations {
           value?: string;
           /** @description The flag to indicate if the environment variable is used in preview deployments. */
           is_preview?: boolean;
-          /** @description The flag to indicate if the environment variable is used in build time. */
-          is_build_time?: boolean;
           /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
           is_literal?: boolean;
           /** @description The flag to indicate if the environment variable is multiline. */
@@ -5100,6 +14765,7 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "update-env-by-service-uuid": {
@@ -5122,8 +14788,6 @@ export interface operations {
           value: string;
           /** @description The flag to indicate if the environment variable is used in preview deployments. */
           is_preview?: boolean;
-          /** @description The flag to indicate if the environment variable is used in build time. */
-          is_build_time?: boolean;
           /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
           is_literal?: boolean;
           /** @description The flag to indicate if the environment variable is multiline. */
@@ -5140,15 +14804,13 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            /** @example Environment variable updated. */
-            message?: string;
-          };
+          "application/json": components["schemas"]["EnvironmentVariable"];
         };
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "update-envs-by-service-uuid": {
@@ -5172,8 +14834,6 @@ export interface operations {
             value?: string;
             /** @description The flag to indicate if the environment variable is used in preview deployments. */
             is_preview?: boolean;
-            /** @description The flag to indicate if the environment variable is used in build time. */
-            is_build_time?: boolean;
             /** @description The flag to indicate if the environment variable is a literal, nothing espaced. */
             is_literal?: boolean;
             /** @description The flag to indicate if the environment variable is multiline. */
@@ -5191,15 +14851,13 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            /** @example Environment variables updated. */
-            message?: string;
-          };
+          "application/json": components["schemas"]["EnvironmentVariable"][];
         };
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+      422: components["responses"]["422"];
     };
   };
   "delete-env-by-service-uuid": {
@@ -5233,6 +14891,84 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
+  "move-service-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Target environment to move the service to. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the target environment. */
+          environment_uuid: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Service moved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Service moved successfully. */
+            message?: string;
+            uuid?: string;
+            project_uuid?: string;
+            environment_uuid?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "migrate-service-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description UUID of the target destination. */
+          destination_uuid: string;
+          /**
+           * @description Whether to transfer persistent volume data when migrating across servers.
+           * @default true
+           */
+          migrate_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Service migration started or completed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
   "start-service-by-uuid": {
     parameters: {
       query?: never;
@@ -5264,7 +15000,10 @@ export interface operations {
   };
   "stop-service-by-uuid": {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Perform docker cleanup (prune networks, volumes, etc.). */
+        docker_cleanup?: boolean;
+      };
       header?: never;
       path: {
         /** @description UUID of the service. */
@@ -5293,7 +15032,10 @@ export interface operations {
   };
   "restart-service-by-uuid": {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Pull latest images. */
+        latest?: boolean;
+      };
       header?: never;
       path: {
         /** @description UUID of the service. */
@@ -5318,6 +15060,844 @@ export interface operations {
       400: components["responses"]["400"];
       401: components["responses"]["401"];
       404: components["responses"]["404"];
+    };
+  };
+  "list-storages-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All storages by service UUID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            persistent_storages?: Record<string, never>[];
+            file_storages?: Record<string, never>[];
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-storage-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The type of storage.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description UUID of the service application or database sub-resource. */
+          resource_uuid: string;
+          /** @description Volume name (persistent only, required for persistent). */
+          name?: string;
+          /** @description The container mount path. */
+          mount_path: string;
+          /** @description The host path (persistent only, optional). */
+          host_path?: string | null;
+          /** @description File content (file only, optional). */
+          content?: string | null;
+          /** @description Whether this is a directory mount (file only, default false). */
+          is_directory?: boolean;
+          /** @description Host directory path (required when is_directory is true). */
+          fs_path?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "update-storage-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    /** @description Storage updated. For read-only storages (from docker-compose or services), only is_preview_suffix_enabled can be updated. */
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The UUID of the storage (preferred). */
+          uuid?: string;
+          /** @description The ID of the storage (deprecated, use uuid instead). */
+          id?: number;
+          /**
+           * @description The type of storage: persistent or file.
+           * @enum {string}
+           */
+          type: "persistent" | "file";
+          /** @description Whether to add -pr-N suffix for preview deployments. */
+          is_preview_suffix_enabled?: boolean;
+          /** @description The volume name (persistent only, not allowed for read-only storages). */
+          name?: string;
+          /** @description The container mount path (not allowed for read-only storages). */
+          mount_path?: string;
+          /** @description The host path (persistent only, not allowed for read-only storages). */
+          host_path?: string | null;
+          /** @description The file content (file only, not allowed for read-only storages). */
+          content?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Storage updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-storage-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            message?: string;
+          };
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-tags-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of tags. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-tag-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description The tag name (min 2 characters). Required if tag_names is not provided. */
+          tag_name?: string;
+          /** @description Array of tag names (each min 2 characters). Required if tag_name is not provided. */
+          tag_names?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Tags added successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-tag-by-service-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the tag. */
+        tag_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag removed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "clone-service-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          destination_uuid: string;
+          name?: string | null;
+          /** @default false */
+          clone_volumes?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Service cloned. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-team-shared-envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Team shared environment variables. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+    };
+  };
+  "create-team-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          key: string;
+          value?: string | null;
+          is_literal?: boolean;
+          is_multiline?: boolean;
+          is_shown_once?: boolean;
+          comment?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Environment variable created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Environment variable already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-team-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-team-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-project-shared-envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Project shared environment variables. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-project-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Environment variable already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-project-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-project-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-environment-shared-envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment shared environment variables. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-environment-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Environment variable already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-environment-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-environment-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Project UUID */
+        uuid: string;
+        /** @description Environment name or UUID */
+        environment_name_or_uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-server-shared-envs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Server shared environment variables. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-server-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Environment variable already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-server-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-server-shared-env": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Server UUID */
+        uuid: string;
+        /** @description Shared env id (integer). */
+        env_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Environment variable updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "list-tags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All tags for the current team. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"][];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+    };
+  };
+  "create-tag": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Tag created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Tag with this name already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-tag-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Tag UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @example Tag deleted. */
+            message?: string;
+          };
+        };
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "update-tag-by-uuid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Tag UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Tag updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tag"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+      /** @description Tag with this name already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: components["responses"]["422"];
     };
   };
   "list-teams": {
@@ -5394,7 +15974,7 @@ export interface operations {
       404: components["responses"]["404"];
     };
   };
-  "get-current-team": {
+  "get-token-team": {
     parameters: {
       query?: never;
       header?: never;
@@ -5403,7 +15983,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Current Team. */
+      /** @description Team bound to the API token. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -5416,7 +15996,7 @@ export interface operations {
       401: components["responses"]["401"];
     };
   };
-  "get-current-team-members": {
+  "get-token-team-members": {
     parameters: {
       query?: never;
       header?: never;
@@ -5425,7 +16005,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Currently authenticated team members. */
+      /** @description Members of the team bound to the API token. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -5436,6 +16016,446 @@ export interface operations {
       };
       400: components["responses"]["400"];
       401: components["responses"]["401"];
+    };
+  };
+  "set-application-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the application. */
+        uuid: string;
+        /** @description UUID of the persistent volume or directory storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VolumeBackupScheduleRequest"];
+      };
+    };
+    responses: {
+      /** @description Backup schedule replaced. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      /** @description Backup schedule created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-application-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Backup schedule and archives deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      /** @description Backup or recovery operation is still running. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "set-database-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the database. */
+        uuid: string;
+        /** @description UUID of the persistent volume or directory storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VolumeBackupScheduleRequest"];
+      };
+    };
+    responses: {
+      /** @description Backup schedule replaced. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      /** @description Backup schedule created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-database-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Backup schedule and archives deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      /** @description Backup or recovery operation is still running. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "set-service-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the service. */
+        uuid: string;
+        /** @description UUID of the persistent volume or directory storage. */
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VolumeBackupScheduleRequest"];
+      };
+    };
+    responses: {
+      /** @description Backup schedule replaced. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      /** @description Backup schedule created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeBackupScheduleResponse"];
+        };
+      };
+      400: components["responses"]["400"];
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      422: components["responses"]["422"];
+    };
+  };
+  "delete-service-storage-backup-schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Backup schedule and archives deleted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components["responses"]["404"];
+      /** @description Backup or recovery operation is still running. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "run-application-storage-backup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage backup queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "run-database-storage-backup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage backup queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "run-service-storage-backup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        storage_uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Storage backup queued. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-vultr-regions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Vultr regions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-vultr-plans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Vultr plans. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-vultr-operating-systems": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Vultr operating systems. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "get-vultr-ssh-keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of Vultr SSH keys. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      404: components["responses"]["404"];
+    };
+  };
+  "create-vultr-server": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Vultr server created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components["responses"]["401"];
+      /** @description Validation failed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Vultr API rate limit exceeded. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
 }
